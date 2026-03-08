@@ -1,0 +1,7 @@
+{
+    "name": "hotel-cecil/sistema",
+    "description": "Sistema de gestión para Hotel Cecil",
+    "require": {
+        "tecnickcom/tcpdf": "^6.6"
+    }
+}
