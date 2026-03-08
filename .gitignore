@@ -28,3 +28,4 @@ node_modules/
 
 # Archivos de configuración local
 config/config.local.php
+vendor/
