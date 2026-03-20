@@ -8,6 +8,12 @@ $page_title = 'Editar Huésped';
 $mensaje = '';
 $tipo_mensaje = '';
 
+// Validar administrador
+if (!esAdmin()) {
+    header('Location: ' . BASE_PATH . '/index.php');
+    exit;
+}
+
 // Verificar que se recibió el ID
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     header('Location: ' . BASE_PATH . '/views/huespedes/activos.php');

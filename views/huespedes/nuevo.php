@@ -8,6 +8,12 @@ $page_title = 'Nuevo Registro de Huésped';
 $mensaje = '';
 $tipo_mensaje = '';
 
+// Validar administrador
+if (!esAdmin()) {
+    header('Location: ' . BASE_PATH . '/index.php');
+    exit;
+}
+
 // Procesar formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $huespedModel = new Huesped();

@@ -28,10 +28,12 @@ include __DIR__ . '/../../includes/header.php';
         <div>
             <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Huéspedes Activos</h1>
         </div>
+        <?php if (esAdmin()): ?>
         <a href="<?php echo BASE_PATH; ?>/views/huespedes/nuevo.php" 
            class="px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-900 rounded transition-colors">
             Nuevo Registro
         </a>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -46,10 +48,12 @@ include __DIR__ . '/../../includes/header.php';
 <?php if (empty($ocupaciones)): ?>
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
         <p class="text-gray-500 dark:text-gray-400 mb-4">No hay huéspedes activos</p>
+        <?php if (esAdmin()): ?>
         <a href="<?php echo BASE_PATH; ?>/views/huespedes/nuevo.php" 
            class="inline-block px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-900 rounded transition-colors">
             Registrar Huésped
         </a>
+        <?php endif; ?>
     </div>
 <?php else: ?>
     <!-- Stats Summary -->
@@ -107,6 +111,7 @@ include __DIR__ . '/../../includes/header.php';
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex items-center justify-center gap-1.5">
+                                <?php if (esAdmin()): ?>
                                 <a href="<?php echo BASE_PATH; ?>/views/huespedes/editar.php?id=<?php echo $ocu['id']; ?>"
                                    class="px-2.5 py-1.5 text-xs font-medium text-white bg-gray-700 hover:bg-gray-800 rounded transition-colors"
                                    title="Editar">
@@ -126,6 +131,9 @@ include __DIR__ . '/../../includes/header.php';
                                         title="Check-out">
                                     Check-out
                                 </button>
+                                <?php else: ?>
+                                <span class="text-xs text-gray-500 italic block">Solo Administrador</span>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
@@ -185,6 +193,7 @@ include __DIR__ . '/../../includes/header.php';
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-center gap-1.5">
+                                    <?php if (esAdmin()): ?>
                                     <a href="<?php echo BASE_PATH; ?>/views/huespedes/extender_estadia.php?id=<?php echo $ocu['id']; ?>"
                                        class="px-2.5 py-1.5 text-xs font-medium text-white rounded transition-colors"
                                        style="background-color: #6b7c3e;"
@@ -193,6 +202,9 @@ include __DIR__ . '/../../includes/header.php';
                                        title="Reactivar y extender estadía">
                                         Extender
                                     </a>
+                                    <?php else: ?>
+                                    <span class="text-xs text-gray-400 italic">No disponible</span>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

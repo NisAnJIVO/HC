@@ -30,11 +30,9 @@ class RegistroOcupacion {
             if ($result) {
                 $insertId = $this->conn->lastInsertId();
                 
-                // Cambiar habitación a estado 'ocupada' - MEJORADO: lanzar excepción si falla
-                $actualizado = $this->actualizarEstadoHabitacion($datos['habitacion_id'], 'ocupado');
+                $actualizado = $this->actualizarEstadoHabitacion($datos['habitacion_id'], 'ocupada');
                 if (!$actualizado) {
                     error_log("ADVERTENCIA: No se pudo actualizar estado de habitación ID: " . $datos['habitacion_id']);
-                    // Aún así retornar el ID porque la ocupación se creó correctamente
                 }
                 
                 return $insertId;

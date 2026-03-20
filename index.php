@@ -275,6 +275,7 @@ body:not(.dark *) .guest-item:hover {
             
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
                 <!-- Nuevo Huésped -->
+                <?php if (esAdmin()): ?>
                 <a href="<?php echo BASE_PATH; ?>/views/huespedes/nuevo.php" class="action-card p-3 sm:p-3.5 block">
                     <div class="flex items-start justify-between mb-1.5 sm:mb-2">
                         <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gray-900 flex items-center justify-center icon-container">
@@ -289,6 +290,7 @@ body:not(.dark *) .guest-item:hover {
                     <div class="font-medium text-gray-900 dark:text-white text-xs sm:text-sm mb-0.5">Nuevo Huésped</div>
                     <div class="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Registrar check-in</div>
                 </a>
+                <?php endif; ?>
                 
                 <!-- Huéspedes Activos -->
                 <a href="<?php echo BASE_PATH; ?>/views/huespedes/activos.php" class="action-card p-3 sm:p-3.5 block">
@@ -418,6 +420,24 @@ body:not(.dark *) .guest-item:hover {
                     <div class="font-medium text-gray-900 dark:text-white text-xs sm:text-sm mb-0.5">Informe Diario</div>
                     <div class="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Resumen del día</div>
                 </a>
+                
+                <!-- Usuarios (Solo Admin) -->
+                <?php if (esAdmin()): ?>
+                <a href="<?php echo BASE_PATH; ?>/views/usuarios/index.php" class="action-card p-3 sm:p-3.5 block">
+                    <div class="flex items-start justify-between mb-1.5 sm:mb-2">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center icon-container">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                        <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </div>
+                    <div class="font-medium text-gray-900 dark:text-white text-xs sm:text-sm mb-0.5">Usuarios</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Gestión sistema</div>
+                </a>
+                <?php endif; ?>
             </div>
         </div>
         

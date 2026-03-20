@@ -268,6 +268,22 @@ if (isset($_SESSION['login_time']) && (time() - $_SESSION['login_time']) > $time
                                     </div>
                                 </a>
                                 <div class="border-t border-gray-100 dark:border-gray-800"></div>
+                                
+                                <a href="<?php echo BASE_PATH; ?>/views/usuarios/index.php" class="block px-5 py-3.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-mist dark:hover:bg-gray-800 transition-colors duration-150 group/item">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="font-medium text-gray-900 dark:text-white">Usuarios</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-500">Gestión de accesos</div>
+                                        </div>
+                                        <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 opacity-60"></div>
+                                    </div>
+                                </a>
+                                <div class="border-t border-gray-100 dark:border-gray-800"></div>
                                 <?php endif; ?>
                                 <a href="<?php echo BASE_PATH; ?>/views/finanzas/resumen.php" class="block px-5 py-3.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-mist dark:hover:bg-gray-800 transition-colors duration-150 group/item">
                                     <div class="flex items-center space-x-3">
@@ -360,6 +376,7 @@ if (isset($_SESSION['login_time']) && (time() - $_SESSION['login_time']) > $time
                 <a href="<?php echo BASE_PATH; ?>/views/finanzas/pagos_qr.php" class="block px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-mist dark:hover:bg-gray-800 rounded-lg transition-colors">Pagos QR</a>
                 <a href="<?php echo BASE_PATH; ?>/views/finanzas/pagos_pendientes.php" class="block px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-mist dark:hover:bg-gray-800 rounded-lg transition-colors">Pagos Pendientes</a>
                 <a href="<?php echo BASE_PATH; ?>/views/finanzas/cierre_caja.php" class="block px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-mist dark:hover:bg-gray-800 rounded-lg transition-colors">Cierre de Caja</a>
+                <a href="<?php echo BASE_PATH; ?>/views/usuarios/index.php" class="block px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-mist dark:hover:bg-gray-800 rounded-lg transition-colors">Usuarios</a>
                 <?php endif; ?>
                 <a href="<?php echo BASE_PATH; ?>/views/finanzas/resumen.php" class="block px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-mist dark:hover:bg-gray-800 rounded-lg transition-colors">Resumen</a>
                 <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'administrador'): ?>
