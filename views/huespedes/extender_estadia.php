@@ -104,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Registrar ingreso financiero (UNA SOLA VEZ)
             $datos_ingreso = [
+                'ocupacion_id' => $habitacion['id'], // Para que aparezca la Hab. y Huésped en el resumen
                 'concepto' => $concepto,
                 'monto' => $monto_a_pagar,
                 'fecha' => date('Y-m-d'),
