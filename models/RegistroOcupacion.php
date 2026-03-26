@@ -356,5 +356,90 @@ class RegistroOcupacion {
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }
+
+    /**
+     * Agrega un huésped adicional a una habitación ya activa.
+     * Copia los datos de estadía del registro existente (fechas, días, pieza).
+     * NO genera ningún ingreso/cobro adicional.
+     */
+    public function agregarHuespedAHabitacion($habitacion_id, $huesped_id) {
+        try {
+            // Verificar que el huésped no esté ya activo en esta habitación
+            $sql = "SELECT id FROM registro_ocupacion
+                    WHERE habitacion_id = :habitacion_id
+                    AND huesped_id = :huesped_id
+                    AND estado = 'activo'";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([
+                ':habitacion_id' => $habitacion_id,
+                ':huesped_id'    => $huesped_id
+            ]);
+            if ($stmt->fetch()) {
+                throw new Exception("Este huésped ya está registrado activo en esa habitación.");
+            }
+
+            // Obtener el primer registro activo de la habitación para copiar datos de estadía
+            $sql = "SELECT * FROM registro_ocupacion
+                    WHERE habitacion_id = :habitacion_id
+                    AND estado = 'activo'
+                    ORDER BY fecha_ingreso ASC
+                    LIMIT 1";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([':habitacion_id' => $habitacion_id]);
+            $referencia = $stmt->fetch();
+
+            if (!$referencia) {
+                throw new Exception("No se encontró una ocupación activa para la habitación indicada.");
+            }
+
+            // Insertar la nueva fila en registro_ocupacion sin generar pago
+            $sql = "INSERT INTO registro_ocupacion
+                        (huesped_id, habitacion_id, nro_pieza, prox_destino, via_ingreso,
+                         fecha_ingreso, nro_dias, fecha_salida_estimada, estado)
+                    VALUES
+                        (:huesped_id, :habitacion_id, :nro_pieza, :prox_destino, :via_ingreso,
+                         :fecha_ingreso, :nro_dias, :fecha_salida_estimada, 'activo')";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([
+                ':huesped_id'           => $huesped_id,
+                ':habitacion_id'        => $habitacion_id,
+                ':nro_pieza'            => $referencia['nro_pieza'],
+                ':prox_destino'         => $referencia['prox_destino'],
+                ':via_ingreso'          => $referencia['via_ingreso'],
+                ':fecha_ingreso'        => $referencia['fecha_ingreso'],
+                ':nro_dias'             => $referencia['nro_dias'],
+                ':fecha_salida_estimada'=> $referencia['fecha_salida_estimada'],
+            ]);
+
+            return $this->conn->lastInsertId();
+
+        } catch (Exception $e) {
+            error_log("Error en agregarHuespedAHabitacion: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Retorna las habitaciones actualmente ocupadas (con al menos 1 registro activo).
+     * Devuelve id, numero, tipo, y lista de huéspedes actuales.
+     */
+    public function obtenerHabitacionesOcupadas() {
+        $sql = "SELECT DISTINCT hab.id, hab.numero, hab.tipo,
+                    (SELECT GROUP_CONCAT(h2.nombres_apellidos SEPARATOR ', ')
+                     FROM registro_ocupacion ro2
+                     INNER JOIN huespedes h2 ON ro2.huesped_id = h2.id
+                     WHERE ro2.habitacion_id = hab.id AND ro2.estado = 'activo'
+                    ) as huespedes_actuales,
+                    ro.fecha_ingreso,
+                    ro.fecha_salida_estimada,
+                    ro.nro_dias
+                FROM habitaciones hab
+                INNER JOIN registro_ocupacion ro ON hab.id = ro.habitacion_id
+                WHERE ro.estado = 'activo'
+                ORDER BY hab.numero ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }
 ?>

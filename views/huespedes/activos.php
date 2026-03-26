@@ -43,6 +43,11 @@ include __DIR__ . '/../../includes/header.php';
         Ocupación finalizada correctamente
     </div>
 <?php endif; ?>
+<?php if (isset($_GET['msg']) && $_GET['msg'] == 'huesped_agregado'): ?>
+    <div class="mb-4 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-sm text-blue-800 dark:text-blue-200">
+        ✔ Huésped adicional registrado correctamente en la habitación.
+    </div>
+<?php endif; ?>
 
 <!-- Content -->
 <?php if (empty($ocupaciones)): ?>
@@ -114,15 +119,23 @@ include __DIR__ . '/../../includes/header.php';
                                 <?php if (esAdmin()): ?>
                                 <a href="<?php echo BASE_PATH; ?>/views/huespedes/editar.php?id=<?php echo $ocu['id']; ?>"
                                    class="px-2.5 py-1.5 text-xs font-medium text-white bg-gray-700 hover:bg-gray-800 rounded transition-colors"
-                                   title="Editar">
+                                   title="Editar datos del huésped">
                                     Editar
+                                </a>
+                                <a href="<?php echo BASE_PATH; ?>/views/huespedes/agregar_huesped.php?habitacion_id=<?php echo $ocu['habitacion_id']; ?>"
+                                   class="px-2.5 py-1.5 text-xs font-medium text-white rounded transition-colors"
+                                   style="background-color: #0e7490;"
+                                   onmouseover="this.style.backgroundColor='#0c637d'"
+                                   onmouseout="this.style.backgroundColor='#0e7490'"
+                                   title="Agregar acompañante a esta habitación">
+                                    + Huésped
                                 </a>
                                 <a href="<?php echo BASE_PATH; ?>/views/huespedes/extender_estadia.php?id=<?php echo $ocu['id']; ?>"
                                    class="px-2.5 py-1.5 text-xs font-medium text-white rounded transition-colors"
                                    style="background-color: #6b7c3e;"
                                    onmouseover="this.style.backgroundColor='#5a6833'"
                                    onmouseout="this.style.backgroundColor='#6b7c3e'"
-                                   title="Extender">
+                                   title="Extender estadía">
                                     Extender
                                 </a>
                                 <button type="button"
