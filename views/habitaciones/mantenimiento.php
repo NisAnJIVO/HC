@@ -11,6 +11,12 @@ $habitacionModel = new Habitacion();
 $mensaje = '';
 $tipo_mensaje = '';
 
+// Leer mensajes pasados por redirección (PRG Pattern)
+if (isset($_GET['msg'])) {
+    $mensaje = urldecode($_GET['msg']);
+    $tipo_mensaje = isset($_GET['type']) ? $_GET['type'] : 'info';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         if (isset($_POST['accion'])) {
@@ -25,15 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $tamano_maximo = 5 * 1024 * 1024; // 5MB
                         
                         if (in_array($extension, $extensiones_permitidas) && $archivo['size'] <= $tamano_maximo) {
-                            // Generar nombre único: habitacion_fecha_hora.extension
                             $habitacion_num = clean_input($_POST['habitacion_numero']);
                             $timestamp = date('Ymd_His');
                             $imagen_nombre = $habitacion_num . '_' . $timestamp . '.' . $extension;
                             
-                            // Ruta donde se guardará
                             $ruta_destino = __DIR__ . '/../../assets/img/Mantenimiento/' . $imagen_nombre;
                             
-                            // Mover archivo
                             if (!move_uploaded_file($archivo['tmp_name'], $ruta_destino)) {
                                 $imagen_nombre = null;
                                 $mensaje = 'Advertencia: No se pudo guardar la imagen, pero el mantenimiento fue registrado';
@@ -42,18 +45,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     }
                     
+                    // Registro simple simplificado a petición del usuario
                     $datos = [
                         'habitacion_numero' => clean_input($_POST['habitacion_numero']),
                         'titulo' => clean_input($_POST['titulo']),
                         'descripcion' => clean_input($_POST['descripcion']),
-                        'prioridad' => $_POST['prioridad'],
-                        'tipo' => $_POST['tipo'],
+                        'prioridad' => 'media', // valor por defecto simplificado
+                        'tipo' => 'correctivo', // valor por defecto simplificado
                         'estado' => 'pendiente',
-                        'costo_estimado' => !empty($_POST['costo_estimado']) ? floatval($_POST['costo_estimado']) : null,
-                        'fecha_inicio' => $_POST['fecha_inicio'],
-                        'fecha_fin_estimada' => !empty($_POST['fecha_fin_estimada']) ? $_POST['fecha_fin_estimada'] : null,
-                        'responsable' => !empty($_POST['responsable']) ? clean_input($_POST['responsable']) : null,
-                        'observaciones' => !empty($_POST['observaciones']) ? clean_input($_POST['observaciones']) : null,
+                        'costo_estimado' => null,
+                        'fecha_inicio' => $_POST['fecha_registro'],
+                        'fecha_fin_estimada' => null,
+                        'responsable' => null,
+                        'observaciones' => null,
                         'imagen' => $imagen_nombre
                     ];
                     
@@ -64,13 +68,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt = $conn->prepare($sql);
                         $stmt->execute([':numero' => $datos['habitacion_numero']]);
                         
-                        if (!isset($mensaje)) {
-                            $mensaje = 'Mantenimiento registrado correctamente';
-                            $tipo_mensaje = 'success';
-                        }
+                        $final_msg = !empty($mensaje) ? $mensaje : 'Mantenimiento registrado correctamente';
+                        $final_type = !empty($tipo_mensaje) ? $tipo_mensaje : 'success';
+                        
+                        header("Location: " . BASE_PATH . "/views/habitaciones/mantenimiento.php?msg=" . urlencode($final_msg) . "&type=" . $final_type);
+                        exit;
                     } else {
-                        $mensaje = 'Error al registrar mantenimiento';
-                        $tipo_mensaje = 'error';
+                        header("Location: " . BASE_PATH . "/views/habitaciones/mantenimiento.php?msg=" . urlencode('Error al registrar mantenimiento') . "&type=error");
+                        exit;
                     }
                     break;
                     
@@ -92,280 +97,421 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             }
                         }
                         
-                        $mensaje = 'Estado actualizado correctamente';
-                        $tipo_mensaje = 'success';
+                        header("Location: " . BASE_PATH . "/views/habitaciones/mantenimiento.php?msg=" . urlencode('Estado actualizado correctamente') . "&type=success");
+                        exit;
                     } else {
-                        $mensaje = 'Error al actualizar estado';
-                        $tipo_mensaje = 'error';
+                        header("Location: " . BASE_PATH . "/views/habitaciones/mantenimiento.php?msg=" . urlencode('Error al actualizar estado') . "&type=error");
+                        exit;
                     }
                     break;
                     
                 case 'eliminar':
                     $id = intval($_POST['id']);
                     if ($mantenimientoModel->eliminar($id)) {
-                        $mensaje = 'Mantenimiento eliminado correctamente';
-                        $tipo_mensaje = 'success';
+                        header("Location: " . BASE_PATH . "/views/habitaciones/mantenimiento.php?msg=" . urlencode('Mantenimiento eliminado correctamente') . "&type=success");
+                        exit;
                     } else {
-                        $mensaje = 'Error al eliminar mantenimiento';
-                        $tipo_mensaje = 'error';
+                        header("Location: " . BASE_PATH . "/views/habitaciones/mantenimiento.php?msg=" . urlencode('Error al eliminar mantenimiento') . "&type=error");
+                        exit;
                     }
                     break;
             }
         }
     } catch (Exception $e) {
-        $mensaje = 'Error: ' . $e->getMessage();
-        $tipo_mensaje = 'error';
+        header("Location: " . BASE_PATH . "/views/habitaciones/mantenimiento.php?msg=" . urlencode('Error: ' . $e->getMessage()) . "&type=error");
+        exit;
     }
 }
 
 // Obtener datos
 $mantenimientos = $mantenimientoModel->obtenerActivos();
-$estadisticas = $mantenimientoModel->obtenerEstadisticas();
 $habitaciones = $habitacionModel->obtenerTodas();
 
 include __DIR__ . '/../../includes/header.php';
 ?>
 
+<style>
+/* Estilos premium Apple-inspired */
+.page-bg {
+    background-color: #f5f5f7;
+}
+.dark .page-bg {
+    background-color: #000000;
+}
 
+/* Room Grid Cards */
+.maint-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    position: relative;
+    cursor: pointer;
+    text-align: left;
+}
 
-<div class="container mx-auto px-4 py-6 sm:py-8" id="print-content">
-    <!-- Header -->
-    <div class="mb-6 sm:mb-8">
-        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-            <div class="flex-1">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">Mantenimiento de Habitaciones</h1>
-                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Control y seguimiento de mantenimientos preventivos y correctivos</p>
+.maint-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+.dark .maint-card {
+    background: #1c1c1e;
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dark .maint-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+}
+
+/* Modals Overlay with premium Glassmorphism */
+.modal-overlay {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px) saturate(190%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    padding: 16px;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-box {
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 24px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
+    width: 100%;
+    max-width: 500px;
+    transform: scale(0.94) translateY(12px);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+    overflow: hidden;
+}
+
+.modal-overlay.active .modal-box {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.dark .modal-box {
+    background: rgba(28, 28, 30, 0.92);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+}
+
+/* Inputs & Form Fields */
+.maint-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    color: #1d1d1f;
+}
+
+.maint-input:focus {
+    outline: none;
+    border-color: #0071e3;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.12);
+}
+
+.dark .maint-input {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f5f5f7;
+}
+
+.dark .maint-input:focus {
+    background: #1c1c1e;
+    border-color: #0071e3;
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.25);
+}
+
+/* Elegant badges */
+.maint-badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.badge-pendiente {
+    background: #fff9e6;
+    color: #b27b00;
+}
+.dark .badge-pendiente {
+    background: rgba(178, 123, 0, 0.15);
+    color: #ffc233;
+}
+
+.badge-proceso {
+    background: #e8f4ff;
+    color: #0066cc;
+}
+.dark .badge-proceso {
+    background: rgba(0, 102, 204, 0.15);
+    color: #4da6ff;
+}
+
+.badge-completado {
+    background: #eafaf1;
+    color: #1a7f37;
+}
+.dark .badge-completado {
+    background: rgba(26, 127, 55, 0.15);
+    color: #56d364;
+}
+
+/* Sleek close button */
+.close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #86868b;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: #1d1d1f;
+}
+
+.dark .close-btn {
+    background: rgba(255, 255, 255, 0.06);
+    color: #aeaeb2;
+}
+
+.dark .close-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #f5f5f7;
+}
+</style>
+
+<div class="min-h-screen page-bg py-6 sm:py-10 transition-colors duration-300">
+    <div class="container mx-auto px-4 max-w-6xl" id="print-content">
+        <!-- Header -->
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">Mantenimiento</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Control y registro minimalista de reparaciones y adecuaciones</p>
             </div>
-            <div class="flex gap-2 no-print">
-                <button onclick="window.open('<?php echo BASE_PATH; ?>/views/habitaciones/generar_pdf_mantenimientos.php', '_blank')" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition flex items-center gap-2 text-sm shadow-md">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            
+            <div class="flex items-center gap-3 no-print">
+                <button onclick="window.open('<?php echo BASE_PATH; ?>/views/habitaciones/generar_pdf_mantenimientos.php', '_blank')" 
+                        class="px-4 py-2.5 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl border border-gray-200 dark:border-gray-700 transition font-medium text-sm flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
-                    Generar PDF
+                    PDF
                 </button>
-                <a href="<?php echo BASE_PATH; ?>/index.php" class="px-3 py-2 sm:px-4 text-sm sm:text-base border border-gray-300 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-center">
-                    ← Volver
+                <a href="<?php echo BASE_PATH; ?>/index.php" 
+                   class="px-4 py-2.5 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl border border-gray-200 dark:border-gray-700 transition font-medium text-sm text-center shadow-sm">
+                    Volver
                 </a>
             </div>
         </div>
-    </div>
 
-    <?php if ($mensaje): ?>
-    <div id="mensaje-alerta" class="mb-6 p-4 rounded-lg <?php echo $tipo_mensaje === 'success' ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'; ?>">
-        <?php echo $mensaje; ?>
-    </div>
-    <script>
-        setTimeout(function() {
-            const alerta = document.getElementById('mensaje-alerta');
-            if (alerta) {
-                alerta.style.transition = 'opacity 0.5s';
-                alerta.style.opacity = '0';
-                setTimeout(() => alerta.remove(), 500);
-            }
-        }, 2000);
-    </script>
-    <?php endif; ?>
+        <?php if ($mensaje): ?>
+        <div id="mensaje-alerta" class="mb-6 p-4 rounded-xl border <?php echo $tipo_mensaje === 'success' ? 'bg-green-50/80 dark:bg-green-950/20 text-green-800 dark:text-green-300 border-green-100 dark:border-green-900/30' : 'bg-red-50/80 dark:bg-red-950/20 text-red-800 dark:text-red-300 border-red-100 dark:border-red-900/30'; ?> transition-all duration-300">
+            <span class="text-sm font-semibold"><?php echo $mensaje; ?></span>
+        </div>
+        <script>
+            setTimeout(function() {
+                const alerta = document.getElementById('mensaje-alerta');
+                if (alerta) {
+                    alerta.style.opacity = '0';
+                    setTimeout(() => alerta.remove(), 400);
+                }
+            }, 2500);
+        </script>
+        <?php endif; ?>
 
-    <!-- Botón Nuevo Mantenimiento -->
-    <div class="mb-6 flex justify-center sm:justify-end no-print">
-        <button onclick="abrirModal()" class="px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white rounded-lg transition-all duration-200 hover:shadow-md flex items-center gap-2">
-            <i class="fas fa-plus text-sm sm:text-base"></i>
-            Nuevo Mantenimiento
-        </button>
-    </div>
+        <!-- Actions Bar -->
+        <div class="mb-6 flex justify-end no-print">
+            <button onclick="abrirModal()" 
+                    class="px-5 py-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 font-semibold rounded-xl hover:bg-gray-800 dark:hover:bg-white transition-all text-sm shadow-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                Nuevo Mantenimiento
+            </button>
+        </div>
 
-    <!-- Lista de Mantenimientos -->
-    <?php if (empty($mantenimientos)): ?>
-    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 sm:p-12 text-center">
-        <i class="fas fa-wrench text-4xl sm:text-6xl text-gray-300 dark:text-gray-600 mb-3 sm:mb-4"></i>
-        <p class="text-gray-600 dark:text-gray-400 text-base sm:text-lg">No hay mantenimientos activos</p>
-        <p class="text-gray-500 dark:text-gray-500 text-xs sm:text-sm mt-2">Haz clic en "Nuevo Mantenimiento" para registrar uno</p>
+        <!-- Mantenimientos List -->
+        <?php if (empty($mantenimientos)): ?>
+        <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-12 text-center shadow-sm">
+            <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <p class="text-gray-500 dark:text-gray-400 font-medium text-base">No hay mantenimientos activos registrados</p>
+            <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">Presiona "Nuevo Mantenimiento" para comenzar.</p>
+        </div>
+        <?php else: ?>
+        
+        <!-- Grid View -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 no-print">
+            <?php foreach ($mantenimientos as $mant): ?>
+            <button onclick='abrirDetalleMantenimiento(<?php echo json_encode($mant, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)' 
+                    class="maint-card min-h-[140px] w-full">
+                
+                <div class="flex justify-between items-start w-full mb-3">
+                    <span class="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Hab. <?php echo $mant['habitacion_numero']; ?></span>
+                    <?php if ($mant['imagen']): ?>
+                    <span class="text-gray-400 dark:text-gray-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </span>
+                    <?php endif; ?>
+                </div>
+                
+                <div class="flex-grow flex flex-col justify-start">
+                    <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 line-clamp-2 leading-snug mb-4">
+                        <?php echo htmlspecialchars($mant['titulo']); ?>
+                    </p>
+                </div>
+                
+                <div class="w-full flex justify-start items-center">
+                    <?php
+                        $estado_class = 'badge-pendiente';
+                        $estado_label = 'Pendiente';
+                        if ($mant['estado'] === 'en_proceso') {
+                            $estado_class = 'badge-proceso';
+                            $estado_label = 'En proceso';
+                        } elseif ($mant['estado'] === 'completado') {
+                            $estado_class = 'badge-completado';
+                            $estado_label = 'Completado';
+                        }
+                    ?>
+                    <span class="maint-badge <?php echo $estado_class; ?>">
+                        <?php echo $estado_label; ?>
+                    </span>
+                </div>
+            </button>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
     </div>
-    <?php else: ?>
-    
-    <!-- Vista de cuadrícula (pantalla) -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 sm:gap-3 no-print">
-        <?php foreach ($mantenimientos as $mant): 
-            $prioridad_colores = [
-                'baja' => ['border' => 'border-gray-300 dark:border-gray-600', 'bg' => 'bg-gray-50 dark:bg-gray-700'],
-                'media' => ['border' => 'border-blue-300 dark:border-blue-700', 'bg' => 'bg-blue-50 dark:bg-blue-900/30'],
-                'alta' => ['border' => 'border-orange-300 dark:border-orange-700', 'bg' => 'bg-orange-50 dark:bg-orange-900/30'],
-                'urgente' => ['border' => 'border-red-300 dark:border-red-700', 'bg' => 'bg-red-50 dark:bg-red-900/30']
-            ];
-            $colores = $prioridad_colores[$mant['prioridad']];
-        ?>
-        <button onclick='abrirDetalleMantenimiento(<?php echo json_encode($mant, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)' 
-                class="aspect-[3/4] rounded-lg border-2 <?php echo $colores['border']; ?> <?php echo $colores['bg']; ?> hover:shadow-lg transition-all duration-200 sm:hover:scale-105 relative group">
-            <div class="absolute inset-0 flex flex-col items-center justify-center p-2 sm:p-3">
-                <span class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white"><?php echo $mant['habitacion_numero']; ?></span>
-                <span class="text-xs text-gray-600 dark:text-gray-300 mt-1 sm:mt-2 text-center line-clamp-3 sm:line-clamp-4 leading-tight"><?php echo htmlspecialchars($mant['titulo']); ?></span>
-            </div>
-            <?php if ($mant['prioridad'] === 'urgente'): ?>
-            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-            <?php endif; ?>
-            <div class="absolute bottom-1 left-1 right-1">
-                <span class="text-xs px-2 py-0.5 rounded-full <?php echo $colores['border']; ?> <?php echo $colores['bg']; ?> block text-center font-semibold text-gray-700 dark:text-gray-300">
-                    <?php echo ucfirst(str_replace('_', ' ', $mant['estado'])); ?>
-                </span>
-            </div>
-        </button>
-        <?php endforeach; ?>
-    </div>
-    
-    <?php endif; ?>
 </div>
 
 <!-- Modal Nuevo Mantenimiento -->
-<div id="modalMantenimiento" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Nuevo Mantenimiento</h2>
-                <button onclick="cerrarModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                    <i class="fas fa-times text-lg sm:text-xl"></i>
-                </button>
-            </div>
+<div id="modalMantenimiento" class="modal-overlay" onclick="if(event.target === this) cerrarModal()">
+    <div class="modal-box">
+        <!-- Header -->
+        <div class="p-6 border-b border-gray-100 dark:border-gray-800/80 flex items-center justify-between">
+            <h2 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Nuevo Mantenimiento</h2>
+            <button type="button" onclick="cerrarModal()" class="close-btn">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
 
-        <form method="POST" action="" enctype="multipart/form-data" class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <!-- Form -->
+        <form method="POST" action="" enctype="multipart/form-data" class="flex-grow overflow-y-auto p-6 space-y-5">
             <input type="hidden" name="accion" value="crear">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <div>
-                    <label class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Habitación <span class="text-red-500">*</span>
-                    </label>
-                    <select name="habitacion_numero" required class="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white">
-                        <option value="">Seleccione habitación</option>
-                        <?php foreach ($habitaciones as $hab): ?>
-                        <option value="<?php echo $hab['numero']; ?>">
-                            Hab. <?php echo $hab['numero']; ?> - <?php echo $hab['tipo']; ?>
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Prioridad <span class="text-red-500">*</span>
-                    </label>
-                    <select name="prioridad" required class="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white">
-                        <option value="baja">Baja</option>
-                        <option value="media" selected>Media</option>
-                        <option value="alta">Alta</option>
-                        <option value="urgente">Urgente</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <div>
-                    <label class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Tipo <span class="text-red-500">*</span>
-                    </label>
-                    <select name="tipo" required class="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white">
-                        <option value="preventivo">Preventivo</option>
-                        <option value="correctivo" selected>Correctivo</option>
-                        <option value="emergencia">Emergencia</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Fecha Inicio <span class="text-red-500">*</span>
-                    </label>
-                    <input type="date" name="fecha_inicio" value="<?php echo date('Y-m-d'); ?>" required 
-                           class="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white">
-                </div>
-            </div>
-
+            <!-- Habitación -->
             <div>
-                <label class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Título <span class="text-red-500">*</span>
+                <label class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+                    Habitación
+                </label>
+                <select name="habitacion_numero" required class="maint-input">
+                    <option value="">Seleccione una habitación</option>
+                    <?php foreach ($habitaciones as $hab): ?>
+                    <option value="<?php echo $hab['numero']; ?>">
+                        Habitación <?php echo $hab['numero']; ?> (<?php echo $hab['tipo']; ?>)
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <!-- Título -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+                    ¿Qué mantenimiento es?
                 </label>
                 <input type="text" name="titulo" required 
-                       placeholder="Ej: Reparación de tubería"
-                       class="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white">
+                       placeholder="Ej. Reparación de grifo, Foco quemado"
+                       class="maint-input">
             </div>
 
+            <!-- Descripción -->
             <div>
-                <label class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Descripción <span class="text-red-500">*</span>
+                <label class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+                    Mini descripción
                 </label>
-                <textarea name="descripcion" required rows="3" class="sm:rows-4"
-                          placeholder="Describa el problema..."
-                          class="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white"></textarea>
+                <textarea name="descripcion" required rows="3" 
+                          placeholder="Describe brevemente los detalles del problema..."
+                          class="maint-input resize-none"></textarea>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <div>
-                    <label class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Responsable
-                    </label>
-                    <input type="text" name="responsable" 
-                           placeholder="Nombre del responsable"
-                           class="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white">
-                </div>
-
-                <div>
-                    <label class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Costo Estimado (Bs.)
-                    </label>
-                    <input type="number" name="costo_estimado" step="0.01" min="0"
-                           placeholder="0.00"
-                           class="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Fecha Fin Estimada
-                    </label>
-                    <input type="date" name="fecha_fin_estimada"
-                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Observaciones
-                    </label>
-                    <input type="text" name="observaciones"
-                           placeholder="Notas adicionales"
-                           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white">
-                </div>
-            </div>
-
+            <!-- Fecha de Registro -->
             <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+                    Fecha de registro
+                </label>
+                <input type="date" name="fecha_registro" value="<?php echo date('Y-m-d'); ?>" required 
+                       class="maint-input">
+            </div>
+
+            <!-- Fotografía (Opcional) -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
                     Fotografía (Opcional)
                 </label>
                 <div class="flex items-center gap-3">
-                    <label for="imagen-mantenimiento" class="flex-1 cursor-pointer">
-                        <div class="w-full px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-camera text-gray-400 dark:text-gray-500"></i>
-                                <span class="text-sm text-gray-600 dark:text-gray-400" id="filename-display">Subir imagen (JPG, PNG - Máx. 5MB)</span>
-                            </div>
+                    <label for="imagen-mantenimiento" class="w-full cursor-pointer">
+                        <div class="w-full px-4 py-4 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl hover:border-gray-400 dark:hover:border-gray-500 transition-colors bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-center gap-3">
+                            <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400" id="filename-display">Subir una imagen</span>
                         </div>
                         <input type="file" id="imagen-mantenimiento" name="imagen" 
                                accept="image/jpeg,image/jpg,image/png" 
                                class="hidden"
-                               onchange="document.getElementById('filename-display').textContent = this.files[0] ? this.files[0].name : 'Subir imagen (JPG, PNG - Máx. 5MB)'">
+                               onchange="document.getElementById('filename-display').textContent = this.files[0] ? this.files[0].name : 'Subir una imagen'">
                     </label>
                 </div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                    <i class="fas fa-info-circle"></i> Puedes adjuntar una foto del problema (fuga, daño, etc.)
-                </p>
             </div>
 
-            <div class="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <!-- Footer Buttons inside Box -->
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800/80">
                 <button type="button" onclick="cerrarModal()" 
-                        class="px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
+                        class="px-5 py-3 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 font-medium transition-all text-sm">
                     Cancelar
                 </button>
                 <button type="submit" 
-                        class="px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white rounded-lg transition-all duration-200">
+                        class="px-5 py-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl hover:bg-gray-800 dark:hover:bg-white font-semibold transition-all text-sm">
                     Registrar Mantenimiento
                 </button>
             </div>
@@ -374,89 +520,72 @@ include __DIR__ . '/../../includes/header.php';
 </div>
 
 <!-- Modal Detalle Mantenimiento -->
-<div id="modalDetalle" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                    <h2 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white truncate">Hab. <span id="d-numero"></span></h2>
-                    <span id="d-prioridad-badge" class="px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-semibold uppercase whitespace-nowrap"></span>
-                </div>
-                <button onclick="cerrarDetalle()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex-shrink-0">
-                    <i class="fas fa-times text-lg sm:text-xl"></i>
-                </button>
+<div id="modalDetalle" class="modal-overlay" onclick="if(event.target === this) cerrarDetalle()">
+    <div class="modal-box">
+        <!-- Header -->
+        <div class="p-6 border-b border-gray-100 dark:border-gray-800/80 flex items-center justify-between">
+            <div>
+                <span class="text-[10px] font-bold tracking-widest text-gray-450 dark:text-gray-500 uppercase">Detalles</span>
+                <h2 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white mt-0.5">Habitación <span id="d-numero"></span></h2>
             </div>
+            <button type="button" onclick="cerrarDetalle()" class="close-btn">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
 
-        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
-            <!-- Título y tipo -->
+        <!-- Content -->
+        <div class="flex-grow overflow-y-auto p-6 space-y-6">
+            <!-- Título -->
             <div>
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2" id="d-titulo"></h3>
-                <div class="flex items-center gap-2">
-                    <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium" id="d-tipo"></span>
-                    <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium" id="d-estado"></span>
-                </div>
+                <span class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">Mantenimiento</span>
+                <p class="text-lg font-bold text-gray-900 dark:text-white leading-snug" id="d-titulo"></p>
+            </div>
+
+            <!-- Estado -->
+            <div>
+                <span class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Estado de atención</span>
+                <span id="d-estado-badge" class="maint-badge"></span>
             </div>
 
             <!-- Descripción -->
-            <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
-                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Descripción</p>
-                <p class="text-sm text-gray-600 dark:text-gray-400" id="d-descripcion"></p>
+            <div class="bg-gray-50 dark:bg-gray-900/30 border border-gray-100/50 dark:border-gray-800/50 rounded-2xl p-4">
+                <span class="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Detalles del problema</span>
+                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed" id="d-descripcion"></p>
             </div>
 
-            <!-- Imagen si existe -->
+            <!-- Fecha Registro -->
+            <div>
+                <span class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">Fecha de registro</span>
+                <p class="text-sm font-bold text-gray-800 dark:text-gray-200" id="d-fecha-inicio"></p>
+            </div>
+
+            <!-- Fotografía -->
             <div id="d-imagen-container" class="hidden">
-                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Fotografía del problema</p>
-                <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-2">
-                    <img id="d-imagen" src="" alt="Imagen del mantenimiento" 
-                         class="w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                <span class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Fotografía adjunta</span>
+                <div class="bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-800/50 rounded-2xl p-2 flex justify-center">
+                    <img id="d-imagen" src="" alt="Imagen" 
+                         class="max-h-[220px] w-auto object-cover rounded-xl cursor-pointer hover:opacity-95 transition-opacity shadow-sm"
                          onclick="abrirImagenFullscreen(this.src)">
                 </div>
             </div>
-
-            <!-- Información en grid -->
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Fecha Inicio</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white" id="d-fecha-inicio"></p>
-                </div>
-                <div id="d-fecha-fin-container" class="hidden">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Fecha Fin Estimada</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white" id="d-fecha-fin"></p>
-                </div>
-                <div id="d-responsable-container" class="hidden">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Responsable</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white" id="d-responsable"></p>
-                </div>
-                <div id="d-costo-container" class="hidden">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Costo Estimado</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white" id="d-costo"></p>
-                </div>
-            </div>
-
-            <!-- Observaciones -->
-            <div id="d-observaciones-container" class="hidden">
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Observaciones</p>
-                <p class="text-sm text-gray-600 dark:text-gray-400" id="d-observaciones"></p>
-            </div>
         </div>
 
-        <!-- Botones de acción -->
-        <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <!-- Footer Actions inside Box -->
+        <div class="p-6 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between">
             <button onclick="eliminarMantenimientoModal()" 
-                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 flex items-center gap-2">
-                <i class="fas fa-trash"></i>
+                    class="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-650 dark:text-red-400 dark:bg-red-950/20 dark:hover:bg-red-900/30 rounded-xl transition-all font-medium text-xs flex items-center gap-1.5 border border-red-200/40 dark:border-red-900/20">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 Eliminar
             </button>
             <div class="flex gap-2">
                 <button id="btn-iniciar" onclick="cambiarEstadoModal('en_proceso')" 
-                        class="hidden px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 flex items-center gap-2">
-                    <i class="fas fa-play"></i>
-                    Iniciar
+                        class="hidden px-5 py-2.5 bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-white text-white dark:text-gray-900 rounded-xl transition-all font-semibold text-xs flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                    Iniciar trabajo
                 </button>
                 <button id="btn-completar" onclick="completarMantenimientoModal()" 
-                        class="hidden px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-200 flex items-center gap-2">
-                    <i class="fas fa-check"></i>
+                        class="hidden px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-semibold text-xs flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                     Completar
                 </button>
             </div>
@@ -468,66 +597,49 @@ include __DIR__ . '/../../includes/header.php';
 let mantenimientoActual = null;
 
 function abrirModal() {
-    document.getElementById('modalMantenimiento').classList.remove('hidden');
+    document.getElementById('modalMantenimiento').classList.add('active');
 }
 
 function cerrarModal() {
-    document.getElementById('modalMantenimiento').classList.add('hidden');
+    document.getElementById('modalMantenimiento').classList.remove('active');
 }
 
 function abrirDetalleMantenimiento(mant) {
     mantenimientoActual = mant;
     
-    // Llenar datos básicos
+    // Llenar datos
     document.getElementById('d-numero').textContent = mant.habitacion_numero;
     document.getElementById('d-titulo').textContent = mant.titulo;
-    document.getElementById('d-tipo').textContent = mant.tipo.charAt(0).toUpperCase() + mant.tipo.slice(1);
-    document.getElementById('d-estado').textContent = mant.estado.replace('_', ' ').charAt(0).toUpperCase() + mant.estado.replace('_', ' ').slice(1);
     document.getElementById('d-descripcion').textContent = mant.descripcion;
-    document.getElementById('d-fecha-inicio').textContent = new Date(mant.fecha_inicio).toLocaleDateString('es-BO');
     
-    // Prioridad badge
-    const prioridadColors = {
-        'baja': 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
-        'media': 'bg-blue-200 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
-        'alta': 'bg-orange-200 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300',
-        'urgente': 'bg-red-200 dark:bg-red-900/50 text-red-700 dark:text-red-300'
-    };
-    const badge = document.getElementById('d-prioridad-badge');
-    badge.textContent = mant.prioridad.charAt(0).toUpperCase() + mant.prioridad.slice(1);
-    badge.className = 'px-3 py-1 rounded-full text-xs font-semibold uppercase ' + prioridadColors[mant.prioridad];
-    
-    // Campos opcionales
-    const fechaFinContainer = document.getElementById('d-fecha-fin-container');
-    if (mant.fecha_fin_estimada) {
-        fechaFinContainer.classList.remove('hidden');
-        document.getElementById('d-fecha-fin').textContent = new Date(mant.fecha_fin_estimada).toLocaleDateString('es-BO');
+    // Parseo local de fecha
+    const parts = mant.fecha_inicio.split('-');
+    if (parts.length === 3) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        const localDate = new Date(year, month, day);
+        document.getElementById('d-fecha-inicio').textContent = localDate.toLocaleDateString('es-BO', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
     } else {
-        fechaFinContainer.classList.add('hidden');
+        document.getElementById('d-fecha-inicio').textContent = mant.fecha_inicio;
     }
     
-    const responsableContainer = document.getElementById('d-responsable-container');
-    if (mant.responsable) {
-        responsableContainer.classList.remove('hidden');
-        document.getElementById('d-responsable').textContent = mant.responsable;
+    // Badge de estado
+    const badge = document.getElementById('d-estado-badge');
+    badge.className = 'maint-badge';
+    if (mant.estado === 'en_proceso') {
+        badge.classList.add('badge-proceso');
+        badge.textContent = 'En proceso';
+    } else if (mant.estado === 'completado') {
+        badge.classList.add('badge-completado');
+        badge.textContent = 'Completado';
     } else {
-        responsableContainer.classList.add('hidden');
-    }
-    
-    const costoContainer = document.getElementById('d-costo-container');
-    if (mant.costo_estimado) {
-        costoContainer.classList.remove('hidden');
-        document.getElementById('d-costo').textContent = 'Bs. ' + parseFloat(mant.costo_estimado).toFixed(2);
-    } else {
-        costoContainer.classList.add('hidden');
-    }
-    
-    const observacionesContainer = document.getElementById('d-observaciones-container');
-    if (mant.observaciones) {
-        observacionesContainer.classList.remove('hidden');
-        document.getElementById('d-observaciones').textContent = mant.observaciones;
-    } else {
-        observacionesContainer.classList.add('hidden');
+        badge.classList.add('badge-pendiente');
+        badge.textContent = 'Pendiente';
     }
     
     // Imagen si existe
@@ -554,16 +666,16 @@ function abrirDetalleMantenimiento(mant) {
         btnCompletar.classList.add('hidden');
     }
     
-    document.getElementById('modalDetalle').classList.remove('hidden');
+    document.getElementById('modalDetalle').classList.add('active');
 }
 
 function cerrarDetalle() {
-    document.getElementById('modalDetalle').classList.add('hidden');
+    document.getElementById('modalDetalle').classList.remove('active');
     mantenimientoActual = null;
 }
 
 function cambiarEstadoModal(nuevoEstado) {
-    if (mantenimientoActual && confirm('¿Cambiar estado del mantenimiento?')) {
+    if (mantenimientoActual && confirm('¿Deseas iniciar el trabajo en esta habitación?')) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.innerHTML = `
@@ -578,7 +690,7 @@ function cambiarEstadoModal(nuevoEstado) {
 
 function completarMantenimientoModal() {
     if (mantenimientoActual) {
-        const costo = prompt('Ingrese el costo real del mantenimiento (Bs):');
+        const costo = prompt('Ingrese el costo real del mantenimiento (Bs.) o presione Aceptar para dejarlo en 0:');
         if (costo !== null) {
             const form = document.createElement('form');
             form.method = 'POST';
@@ -586,7 +698,7 @@ function completarMantenimientoModal() {
                 <input type="hidden" name="accion" value="cambiar_estado">
                 <input type="hidden" name="id" value="${mantenimientoActual.id}">
                 <input type="hidden" name="estado" value="completado">
-                <input type="hidden" name="costo_real" value="${costo}">
+                <input type="hidden" name="costo_real" value="${costo || 0}">
             `;
             document.body.appendChild(form);
             form.submit();
@@ -595,7 +707,7 @@ function completarMantenimientoModal() {
 }
 
 function eliminarMantenimientoModal() {
-    if (mantenimientoActual && confirm('¿Está seguro de eliminar este mantenimiento? Esta acción no se puede deshacer.')) {
+    if (mantenimientoActual && confirm('¿Estás seguro de eliminar este registro de mantenimiento?')) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.innerHTML = `
@@ -606,13 +718,6 @@ function eliminarMantenimientoModal() {
         form.submit();
     }
 }
-
-// Cerrar modal al hacer clic fuera
-document.getElementById('modalDetalle').addEventListener('click', function(e) {
-    if (e.target === this) {
-        cerrarDetalle();
-    }
-});
 
 // Cerrar con ESC
 document.addEventListener('keydown', function(e) {
@@ -625,17 +730,17 @@ document.addEventListener('keydown', function(e) {
 // Función para abrir imagen en pantalla completa
 function abrirImagenFullscreen(src) {
     const overlay = document.createElement('div');
-    overlay.className = 'fixed inset-0 bg-black bg-opacity-90 z-[100] flex items-center justify-center p-4';
+    overlay.className = 'fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 cursor-pointer';
     overlay.onclick = function() { this.remove(); };
     
     const img = document.createElement('img');
     img.src = src;
-    img.className = 'max-w-full max-h-full object-contain rounded-lg';
+    img.className = 'max-w-full max-h-full object-contain rounded-xl shadow-2xl';
     img.onclick = function(e) { e.stopPropagation(); };
     
     const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '<i class="fas fa-times text-2xl"></i>';
-    closeBtn.className = 'absolute top-4 right-4 text-white hover:text-gray-300 bg-black bg-opacity-50 rounded-full w-12 h-12 flex items-center justify-center';
+    closeBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+    closeBtn.className = 'absolute top-4 right-4 text-white hover:text-gray-300 bg-black/40 rounded-full w-12 h-12 flex items-center justify-center border border-white/10';
     closeBtn.onclick = function() { overlay.remove(); };
     
     overlay.appendChild(img);

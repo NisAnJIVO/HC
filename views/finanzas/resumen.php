@@ -41,855 +41,643 @@ include __DIR__ . '/../../includes/header.php';
 ?>
 
 <style>
+/* ═══════════════════════════════════════════════
+   Apple Premium Finance Aesthetic (Screen & Print)
+   ═══════════════════════════════════════════════ */
+
+:root {
+    --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: #f5f5f7;
+    font-family: var(--apple-font);
+    color: #1d1d1f;
+}
+
+.apple-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 24px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.015);
+    padding: 30px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .apple-card {
+    background: #161616;
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Premium Form Inputs */
+.apple-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 14px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    color: #1d1d1f;
+}
+
+.apple-input:focus {
+    outline: none;
+    border-color: #0071e3;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.12);
+}
+
+.dark .apple-input {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f5f5f7;
+}
+
+.dark .apple-input:focus {
+    background: #1c1c1e;
+    border-color: #0071e3;
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.25);
+}
+
+/* Premium Metric Cards */
+.mini-metric {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 18px;
+    padding: 20px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.005);
+}
+
+.dark .mini-metric {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.mini-num {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: #1d1d1f;
+    font-variant-numeric: tabular-nums;
+}
+
+.dark .mini-num {
+    color: #ffffff;
+}
+
+.mini-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #86868b;
+    margin-bottom: 8px;
+}
+
+.dark .mini-label {
+    color: #aeaeb2;
+}
+
+/* Premium Color Highlights for Metric Boxes */
+.metric-efectivo {
+    background: rgba(52, 199, 89, 0.04);
+    border-color: rgba(52, 199, 89, 0.15);
+}
+.dark .metric-efectivo {
+    background: rgba(52, 199, 89, 0.06);
+    border-color: rgba(52, 199, 89, 0.2);
+}
+
+.metric-qr {
+    background: rgba(0, 113, 227, 0.04);
+    border-color: rgba(0, 113, 227, 0.15);
+}
+.dark .metric-qr {
+    background: rgba(0, 113, 227, 0.06);
+    border-color: rgba(0, 113, 227, 0.2);
+}
+
+.metric-egresos {
+    background: rgba(255, 59, 48, 0.04);
+    border-color: rgba(255, 59, 48, 0.15);
+}
+.dark .metric-egresos {
+    background: rgba(255, 59, 48, 0.06);
+    border-color: rgba(255, 59, 48, 0.2);
+}
+
+.metric-balance {
+    background: rgba(255, 149, 0, 0.04);
+    border-color: rgba(255, 149, 0, 0.15);
+}
+.dark .metric-balance {
+    background: rgba(255, 149, 0, 0.06);
+    border-color: rgba(255, 149, 0, 0.2);
+}
+
+/* Premium Tables */
+.premium-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+
+.premium-table th {
+    background: #f5f5f7;
+    color: #86868b;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    padding: 12px 18px;
+    text-align: left;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dark .premium-table th {
+    background: rgba(255, 255, 255, 0.03);
+    color: #aeaeb2;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.premium-table td {
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    color: #1d1d1f;
+    font-variant-numeric: tabular-nums;
+}
+
+.dark .premium-table td {
+    color: #f5f5f7;
+    border-bottom-color: rgba(255, 255, 255, 0.04);
+}
+
+.premium-table tr:last-child td {
+    border-bottom: none;
+}
+
+.premium-table tr:hover td {
+    background: rgba(0, 0, 0, 0.008);
+}
+
+.dark .premium-table tr:hover td {
+    background: rgba(255, 255, 255, 0.008);
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .table-responsive {
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.section-divider {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #86868b;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding-bottom: 6px;
+    margin-bottom: 16px;
+    margin-top: 10px;
+}
+
+.dark .section-divider {
+    color: #aeaeb2;
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ═══════════════════════════════════════════════
+   LUXURIOUS COLORFUL PRINT / PDF STYLES
+   ═══════════════════════════════════════════════ */
 @media print {
     .no-print { display: none !important; }
     
-    /* Ocultar completamente todo el header/nav */
-    nav,
-    header,
-    .fixed,
-    body > nav,
-    [role="navigation"],
-    #mobile-menu,
-    #mobile-menu-btn,
-    button#theme-toggle {
+    nav, header, .fixed, body > nav, [role="navigation"], #mobile-menu, #mobile-menu-btn, button#theme-toggle {
         display: none !important;
         visibility: hidden !important;
         height: 0 !important;
         overflow: hidden !important;
     }
     
-    /* Asegurar que nada con position fixed se muestre */
     * {
         position: static !important;
     }
     
-    /* Ocultar scripts y elementos no deseados */
-    script,
-    noscript,
-    .hidden {
-        display: none !important;
-    }
-    
-    /* Resetear body para impresión */
     body {
+        background-color: #f5f5f7 !important;
+        color: #1d1d1f !important;
+        font-size: 9.5pt !important;
         padding-top: 0 !important;
-        margin-top: 0 !important;
+        margin: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
     
-    /* Resetear contenedores principales */
-    .pt-12,
-    .pt-20,
-    .py-12,
-    .py-8,
-    .px-6 {
-        padding: 0 !important;
-    }
-    
-    .max-w-7xl {
+    .print-container {
+        display: block !important;
+        background-color: #ffffff !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        border-radius: 24px !important;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.015) !important;
+        padding: 0.8cm !important;
         max-width: 100% !important;
+        width: 100% !important;
         margin: 0 !important;
-        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
     
-    /* Asegurar que el contenido principal sea limpio */
-    body > div,
-    body > div > div {
-        padding: 0 !important;
-        margin: 0 !important;
+    .summary-cards {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 12px !important;
+        margin-bottom: 0.6cm !important;
     }
     
-    /* Solo el print-container debe tener padding */
-    body > * {
-        padding: 0 !important;
-        margin: 0 !important;
+    .mini-metric {
+        background-color: #ffffff !important;
+        border: 1px solid rgba(0, 0, 0, 0.06) !important;
+        border-radius: 16px !important;
+        padding: 14px !important;
+        display: block !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
     
-    body .print-container {
-        padding: 0.5cm !important;
+    .metric-efectivo {
+        background-color: rgba(52, 199, 89, 0.05) !important;
+        border-color: rgba(52, 199, 89, 0.18) !important;
+    }
+    .metric-qr {
+        background-color: rgba(0, 113, 227, 0.05) !important;
+        border-color: rgba(0, 113, 227, 0.18) !important;
+    }
+    .metric-egresos {
+        background-color: rgba(255, 59, 48, 0.05) !important;
+        border-color: rgba(255, 59, 48, 0.18) !important;
+    }
+    .metric-balance {
+        background-color: rgba(255, 149, 0, 0.05) !important;
+        border-color: rgba(255, 149, 0, 0.18) !important;
+    }
+
+    .table-responsive {
+        border-radius: 16px !important;
+        border: 1px solid rgba(0, 0, 0, 0.06) !important;
+        overflow: hidden !important;
+        background-color: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    table { 
+        page-break-inside: auto; 
+        font-size: 8.5pt !important;
+        margin-bottom: 0.5cm !important;
+        border-collapse: collapse !important;
+        width: 100% !important;
+    }
+    
+    table tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+    
+    thead {
+        display: table-header-group;
+    }
+    
+    .premium-table th {
+        background-color: #f5f5f7 !important;
+        color: #86868b !important;
+        font-weight: 700 !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+        padding: 10px 14px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .premium-table td {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+        padding: 10px 14px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .section-divider {
+        font-size: 10pt !important;
+        font-weight: 800 !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+        padding-bottom: 5px !important;
+        margin-top: 0.6cm !important;
+        margin-bottom: 0.3cm !important;
+        color: #86868b !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .signature-section { 
+        margin-top: 1.2cm !important; 
+        page-break-inside: avoid;
+        border-top: 1px solid rgba(0,0,0,0.1) !important;
+        padding-top: 0.4cm !important;
     }
     
     @page {
         size: letter portrait;
         margin: 1.2cm 1cm 1cm 1cm;
     }
-    
-    /* Forzar impresi\u00f3n de colores de fondo */
-    * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-    }
-    
-    body {
-        background: white !important;
-        padding: 0 !important;
-        font-size: 9pt;
-        color: #000 !important;
-    }
-    .print-container {
-        display: block !important;
-        background: white !important;
-        box-shadow: none !important;
-        border: none !important;
-        border-radius: 0 !important;
-        margin: 0 !important;
-        padding: 0.5cm !important;
-        max-width: 100% !important;
-        width: 100% !important;
-    }
-    
-    /* Eliminar todos los bordes redondeados */
-    .rounded,
-    .rounded-xl,
-    .rounded-2xl,
-    .rounded-lg {
-        border-radius: 0 !important;
-    }
-    
-    /* Header del informe - ocultar en impresión */
-    .print-header {
-        display: none !important;
-    }
-    
-    .print-header-formal {
-        display: block !important;
-        margin-bottom: 0.3cm !important;
-        padding-bottom: 0.15cm !important;
-        page-break-after: avoid;
-    }
-    
-    /* Tablas pueden dividirse entre páginas */
-    table { 
-        page-break-inside: auto; 
-        font-size: 8pt;
-        margin-bottom: 0.3cm !important;
-        border-collapse: collapse !important;
-    }
-    
-    /* Evitar que las filas se corten */
-    table tr {
-        page-break-inside: avoid;
-        page-break-after: auto;
-    }
-    
-    /* Headers de tablas se repiten */
-    thead {
-        display: table-header-group;
-        font-weight: bold !important;
-    }
-    
-    /* Estilo formal para headers de tabla */
-    table thead tr {
-        background-color: #e8e8e8 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    table thead th {
-        border: 1px solid #000 !important;
-        background-color: #e8e8e8 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    /* Bordes de celdas */
-    table td,
-    table th {
-        border: 1px solid #666 !important;
-    }
-    
-    /* Footers de tablas */
-    tfoot {
-        display: table-footer-group;
-    }
-    
-    table th,
-    table td {
-        padding: 2px 4px !important;
-        line-height: 1.3 !important;
-    }
-    
-    /* Filas totales destacadas */
-    tr.font-bold {
-        background-color: #f0f0f0 !important;
-        font-weight: bold !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    tr.bg-green-100 {
-        background-color: #d1fae5 !important;
-        font-weight: bold !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    tr.bg-blue-100 {
-        background-color: #dbeafe !important;
-        font-weight: bold !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    tr.bg-red-100 {
-        background-color: #fee2e2 !important;
-        font-weight: bold !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    .signature-section { 
-        margin-top: 1.5cm !important; 
-        page-break-inside: avoid;
-        border-top: 1px solid #000 !important;
-        padding-top: 0.3cm !important;
-    }
-    
-    .signature-section .border-t {
-        border-top: 1px solid #000 !important;
-    }
-    
-    /* Estilos para el resumen consolidado */
-    .mb-3.border {
-        border: 1px solid #000 !important;
-    }
-    
-    /* Tabla del resumen consolidado */
-    .mb-3.border table {
-        border: none !important;
-    }
-    
-    .mb-3.border table td {
-        border: none !important;
-        border-bottom: 1px solid #ddd !important;
-        padding: 0.1cm 0.2cm !important;
-    }
-    
-    .mb-3.border table tr:last-child td {
-        border-bottom: none !important;
-    }
-    
-    /* Fila de "Efectivo a Entregar" destacada */
-    .mb-3.border table tr.border-y td,
-    .mb-3.border table tr.bg-yellow-50 td {
-        border-top: 2px solid #000 !important;
-        border-bottom: 2px solid #000 !important;
-        background-color: #fef3c7 !important;
-        font-size: 10pt !important;
-        padding: 0.15cm 0.2cm !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    /* Mantener colores de texto en resumen */
-    .mb-3.border .text-green-600 {
-        color: #059669 !important;
-    }
-    
-    .mb-3.border .text-blue-600 {
-        color: #2563eb !important;
-    }
-    
-    .mb-3.border .text-red-600 {
-        color: #dc2626 !important;
-    }
-    
-    .mb-3.border .text-yellow-800 {
-        color: #92400e !important;
-    }
-    
-    h1 { 
-        font-size: 15pt; 
-        margin-bottom: 0.15cm !important; 
-        line-height: 1.2 !important;
-    }
-    h2 { 
-        font-size: 12pt; 
-        margin-bottom: 0.15cm !important; 
-        line-height: 1.2 !important;
-    }
-    h3 { 
-        font-size: 10pt; 
-        margin-bottom: 0.1cm !important;
-        line-height: 1.2 !important;
-    }
-    
-    /* Reducir espacios entre secciones */
-    .print-container > div {
-        margin-bottom: 0.3cm !important;
-    }
-    
-    /* Eliminar espacio superior de la primera sección después del resumen */
-    .summary-table + .mb-4,
-    .summary-table ~ .mb-4:first-of-type {
-        margin-top: 0 !important;
-        page-break-before: avoid !important;
-    }
-    
-    /* Hacer títulos de secciones más compactos y formales */
-    .bg-gray-800,
-    .bg-green-600,
-    .bg-blue-600,
-    .bg-red-600 {
-        color: #fff !important;
-        border: none !important;
-        border-bottom: 2px solid #000 !important;
-        padding: 0.15cm 0.2cm !important;
-        margin-bottom: 0.15cm !important;
-        page-break-after: avoid;
-        font-size: 10pt !important;
-        font-weight: bold !important;
-        text-transform: uppercase;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    .bg-green-600 {
-        background-color: #059669 !important;
-    }
-    
-    .bg-blue-600 {
-        background-color: #2563eb !important;
-    }
-    
-    .bg-red-600 {
-        background-color: #dc2626 !important;
-    }
-    
-    .bg-gray-800 {
-        background-color: #1f2937 !important;
-    }
-    
-    .bg-green-600 span,
-    .bg-blue-600 span,
-    .bg-red-600 span {
-        display: inline !important;
-        color: rgba(255, 255, 255, 0.9) !important;
-    }
-    
-    /* Resumen ejecutivo - cambiar a tabla formal */
-    .summary-cards {
-        display: none !important;
-    }
-    
-    .summary-table {
-        display: table !important;
-        width: 100% !important;
-        margin-bottom: 0.25cm !important;
-        border: 1px solid #000 !important;
-        page-break-after: avoid !important;
-    }
-    
-    /* Evitar que secciones se corten al inicio */
-    .mb-4 {
-        page-break-inside: auto;
-        margin-bottom: 0.3cm !important;
-    }
-    
-    /* Primera sección debe estar pegada al resumen */
-    .mb-4:first-of-type {
-        margin-top: 0 !important;
-        page-break-before: avoid !important;
-    }
-    
-    /* Asegurar que no haya espacios extra */
-    .summary-table {
-        margin-bottom: 0.25cm !important;
-    }
-    
-    /* Siguiente elemento después de la tabla de resumen */
-    .print-container > .summary-table + * {
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-    }
-    
-    /* Asegurar que subtotales no se separen de sus tablas */
-    tr.font-bold {
-        page-break-before: avoid;
-    }
-    
-    /* Mantener colores de fondo para mejor legibilidad */
-    .bg-green-50 {
-        background-color: #f0fdf4 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    .bg-blue-50 {
-        background-color: #eff6ff !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    .bg-red-50 {
-        background-color: #fef2f2 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    .bg-yellow-50 {
-        background-color: #fefce8 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    .bg-gray-50 {
-        background-color: #f9fafb !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    /* Mantener colores de texto legibles */
-    .text-green-600,
-    .text-green-700,
-    .text-green-800 {
-        color: #065f46 !important;
-    }
-    
-    .text-blue-600,
-    .text-blue-700 {
-        color: #1e40af !important;
-    }
-    
-    .text-red-600,
-    .text-red-700 {
-        color: #b91c1c !important;
-    }
-    
-    .text-yellow-700,
-    .text-yellow-800 {
-        color: #a16207 !important;
-    }
-    
-    .text-gray-500,
-    .text-gray-600,
-    .text-gray-700,
-    .text-gray-900 {
-        color: #000 !important;
-    }
-    
-    /* Texto blanco para headers de secciones */
-    .bg-green-600 *,
-    .bg-blue-600 *,
-    .bg-red-600 *,
-    .bg-gray-800 * {
-        color: #fff !important;
-    }
-    
-    /* Enlaces y botones */
-    a, button {
-        color: #000 !important;
-        text-decoration: none !important;
-    }
-    
-    /* Bordes visibles */
-    .border-gray-300,
-    .border-gray-200,
-    .border-gray-700,
-    .border-gray-800 {
-        border-color: #666 !important;
-    }
-}
-
-.compact-table {
-    font-size: 10px;
-    line-height: 1.3;
-}
-.compact-table th,
-.compact-table td {
-    padding: 3px 6px;
-}
-
-@media (min-width: 768px) {
-    .compact-table {
-        font-size: 11px;
-    }
-    .compact-table th,
-    .compact-table td {
-        padding: 4px 8px;
-    }
-}
-
-/* Hacer tablas scrolleables en móvil */
-.table-responsive {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-@media (max-width: 767px) {
-    .compact-table thead th {
-        font-size: 9px;
-        padding: 2px 4px;
-    }
-    .compact-table tbody td {
-        font-size: 9px;
-        padding: 2px 4px;
-    }
 }
 </style>
 
-<!-- Botones de acción (no se imprimen) -->
+<!-- Action Header -->
 <div class="no-print mb-8">
     <?php if (isset($_GET['error']) && $_GET['error'] === 'acceso_denegado'): ?>
-    <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+    <div class="mb-6 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-2xl animate-fade-in">
         <div class="flex items-center gap-3">
-            <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
+            <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
             <div>
-                <p class="text-sm font-semibold text-red-900 dark:text-red-300">Acceso Denegado</p>
-                <p class="text-xs text-red-700 dark:text-red-400 mt-1">No tienes permisos para acceder a esa sección. Solo los administradores pueden registrar ingresos y egresos.</p>
+                <p class="text-sm font-bold text-red-900 dark:text-red-300">Acceso Denegado</p>
+                <p class="text-xs text-red-700 dark:text-red-450 mt-0.5">No tienes permisos para acceder a esa sección. Solo los administradores pueden registrar ingresos y egresos.</p>
             </div>
         </div>
     </div>
     <?php endif; ?>
     
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-2xl md:text-4xl font-bold text-noir dark:text-white mb-2">Resumen Financiero</h1>
-            <p class="text-sm md:text-base text-gray-500 dark:text-gray-400">Informe detallado de caja para liquidación</p>
+            <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-1">Resumen Financiero</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Liquidación de caja y auditoría financiera de ingresos y egresos</p>
         </div>
-        <div class="flex gap-2 md:gap-3">
-            <button onclick="window.print()" class="flex-1 md:flex-none px-3 md:px-6 py-2 md:py-3 bg-gray-900 dark:bg-gray-700 text-white rounded-lg md:rounded-xl text-sm md:text-base font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition-all duration-200">
-                <span class="hidden md:inline"></span>Imprimir
+        <div class="flex gap-2">
+            <button onclick="window.print()" class="px-5 py-3 bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-white text-white dark:text-gray-900 text-sm font-semibold rounded-2xl transition duration-205 shadow-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                Imprimir PDF
             </button>
-            <a href="<?php echo BASE_PATH; ?>/index.php" class="flex-1 md:flex-none px-3 md:px-6 py-2 md:py-3 border border-gray-300 dark:border-gray-700 rounded-lg md:rounded-xl text-gray-700 dark:text-gray-300 text-sm md:text-base font-medium hover:bg-mist dark:hover:bg-gray-800 transition-all duration-200 text-center">
-                ← Volver
+            <a href="<?php echo BASE_PATH; ?>/index.php" class="px-5 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 rounded-2xl border border-gray-200 dark:border-gray-700 transition font-semibold text-sm text-center shadow-sm">
+                Volver
             </a>
         </div>
     </div>
 </div>
 
-<!-- Filtro de Fechas (no se imprime) -->
-<div class="no-print bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden mb-8">
-    <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-900">
-        <h2 class="text-xl font-semibold text-noir dark:text-white">Período de Análisis</h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Selecciona el rango de fechas para el informe</p>
+<!-- Filter Sheet -->
+<div class="no-print apple-card mb-8">
+    <div class="pb-4 mb-5 border-b border-gray-100 dark:border-gray-800">
+        <h2 class="text-base font-extrabold text-gray-900 dark:text-white">Período de Análisis</h2>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Selecciona el rango de fechas y recepcionista para el informe</p>
     </div>
     
-    <form method="GET" class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <form method="GET">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
             <div class="space-y-2">
-                <label class="block text-sm font-semibold text-noir dark:text-white">Fecha Inicio</label>
-                <input type="date" name="fecha_inicio" 
-                       value="<?php echo $fecha_inicio; ?>"
-                       class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-noir dark:text-white bg-white dark:bg-gray-800">
+                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Fecha Inicio</label>
+                <input type="date" name="fecha_inicio" value="<?php echo $fecha_inicio; ?>" class="apple-input">
             </div>
             <div class="space-y-2">
-                <label class="block text-sm font-semibold text-noir dark:text-white">Fecha Fin</label>
-                <input type="date" name="fecha_fin" 
-                       value="<?php echo $fecha_fin; ?>"
-                       class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-noir dark:text-white bg-white dark:bg-gray-800">
+                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Fecha Fin</label>
+                <input type="date" name="fecha_fin" value="<?php echo $fecha_fin; ?>" class="apple-input">
             </div>
             <div class="space-y-2">
-                <label class="block text-sm font-semibold text-noir dark:text-white">
-                    <i class="fas fa-user text-gray-500 mr-1"></i>
-                    Recepcionista
-                </label>
-                <select name="recepcionista" id="recepcionista_select"
-                        onchange="toggleRecepcionistaOtro()"
-                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-noir dark:text-white bg-white dark:bg-gray-800">
+                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Recepcionista</label>
+                <select name="recepcionista" id="recepcionista_select" onchange="toggleRecepcionistaOtro()" class="apple-input bg-white cursor-pointer">
                     <option value="Isaac Vargas" <?php echo ($recepcionista === 'Isaac Vargas') ? 'selected' : ''; ?>>Isaac Vargas</option>
                     <option value="Gabriel Duran" <?php echo ($recepcionista === 'Gabriel Duran') ? 'selected' : ''; ?>>Gabriel Duran</option>
-                    <option value="otro" <?php echo (!in_array($recepcionista, ['Isaac Vargas', 'Gabriel Duran'])) ? 'selected' : ''; ?>>Otro (escribir nombre)</option>
+                    <option value="otro" <?php echo (!in_array($recepcionista, ['Isaac Vargas', 'Gabriel Duran'])) ? 'selected' : ''; ?>>Otro...</option>
                 </select>
             </div>
             <div class="flex items-end">
-                <button type="submit" 
-                        class="w-full px-6 py-3.5 bg-gray-900 dark:bg-gray-700 text-white font-semibold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                <button type="submit" class="w-full px-5 py-3 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-gray-900 font-bold rounded-2xl transition duration-200 shadow-sm text-sm text-center">
                     Actualizar Resumen
                 </button>
             </div>
         </div>
         
-        <!-- Campo de texto para "Otro recepcionista" -->
+        <!-- Custom Receptionist Field -->
         <div id="recepcionista_otro_div" class="mt-4" style="display: <?php echo (!in_array($recepcionista, ['Isaac Vargas', 'Gabriel Duran'])) ? 'block' : 'none'; ?>;">
-            <label class="block text-sm font-semibold text-noir dark:text-white mb-2">
-                <i class="fas fa-pencil-alt text-gray-500 mr-1"></i>
-                Nombre del Recepcionista
-            </label>
-            <input type="text" 
-                   name="recepcionista_otro" 
-                   id="recepcionista_otro_input"
-                   value="<?php echo (!in_array($recepcionista, ['Isaac Vargas', 'Gabriel Duran'])) ? htmlspecialchars($recepcionista) : ''; ?>"
-                   placeholder="Ej: María López"
-                   class="w-full md:w-1/2 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-noir dark:text-white bg-white dark:bg-gray-800">
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ingresa el nombre completo del recepcionista</p>
+            <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Nombre del Recepcionista</label>
+            <input type="text" name="recepcionista_otro" id="recepcionista_otro_input" value="<?php echo (!in_array($recepcionista, ['Isaac Vargas', 'Gabriel Duran'])) ? htmlspecialchars($recepcionista) : ''; ?>" placeholder="Ej: María López" class="apple-input md:w-1/2">
         </div>
     </form>
 </div>
 
-<!-- INFORME IMPRIMIBLE -->
-<div class="print-container bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden p-6">
+<!-- PRINTABLE CONTAINER -->
+<div class="print-container apple-card mb-8">
     
-    <!-- Header decorativo (solo pantalla) -->
-    <div class="print-header mb-4 pb-3 border-b-2 border-gray-800 dark:border-gray-600">
-        <div class="flex justify-between items-start">
+    <!-- Header -->
+    <div class="mb-6 pb-5 border-b-2 border-gray-900 dark:border-gray-800">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
             <div>
-                <h1 class="text-xl font-bold text-gray-900 dark:text-white">HOTEL CECIL</h1>
-                <h2 class="text-base font-semibold text-gray-700 dark:text-gray-300">Informe de Liquidación de Caja</h2>
+                <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white uppercase tracking-tight">HOTEL CECIL</h1>
+                <h2 class="text-xs font-bold text-gray-450 dark:text-gray-500 mt-1">Informe de Liquidación de Caja</h2>
             </div>
-            <div class="text-right text-xs text-gray-600 dark:text-gray-400">
-                <p><strong>Período:</strong> <?php echo formatDate($fecha_inicio); ?> - <?php echo formatDate($fecha_fin); ?></p>
-                <p><strong>Emitido:</strong> <?php echo date('d/m/Y H:i'); ?></p>
-                <p><strong>Recepcionista:</strong> <?php echo htmlspecialchars($recepcionista); ?></p>
+            <div class="text-left sm:text-right text-xs text-gray-500 space-y-1">
+                <p><strong>Período:</strong> <?php echo formatDate($fecha_inicio); ?> al <?php echo formatDate($fecha_fin); ?></p>
+                <p><strong>Generado:</strong> <?php echo date('d/m/Y H:i'); ?> hrs</p>
+                <p><strong>Auditor/Responsable:</strong> <?php echo htmlspecialchars($recepcionista); ?></p>
             </div>
         </div>
     </div>
-    
-    <!-- Header formal (solo impresión) -->
-    <div class="print-header-formal" style="display: none;">
-        <table class="w-full text-xs" style="border: none;">
-            <tr>
-                <td style="width: 70%; vertical-align: top; border: none;">
-                    <div style="font-size: 16pt; font-weight: bold; margin-bottom: 0.1cm;">HOTEL CECIL</div>
-                    <div style="font-size: 11pt; font-weight: 600; margin-bottom: 0.1cm;">INFORME DE LIQUIDACIÓN DE CAJA</div>
-                    <div style="font-size: 9pt;">Recepcionista: <?php echo htmlspecialchars($recepcionista); ?></div>
-                </td>
-                <td style="width: 30%; vertical-align: top; text-align: right; border: none;">
-                    <div style="font-size: 9pt; line-height: 1.4;">
-                        <strong>Período:</strong><br>
-                        <?php echo formatDate($fecha_inicio); ?><br>
-                        al <?php echo formatDate($fecha_fin); ?><br><br>
-                        <strong>Fecha de Emisión:</strong><br>
-                        <?php echo date('d/m/Y H:i'); ?>
-                    </div>
-                </td>
-            </tr>
-        </table>
-        <div style="border-bottom: 2px solid #000; margin-top: 0.2cm; margin-bottom: 0.3cm;"></div>
+
+    <!-- Executive Metrics Grid (Kept beautifully in screen AND print PDF) -->
+    <div class="summary-cards grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="mini-metric metric-efectivo">
+            <div class="mini-label">Ingresos Efectivo</div>
+            <div class="mini-num text-emerald-600 dark:text-emerald-450">Bs. <?php echo formatMoney($total_efectivo); ?></div>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-semibold"><?php echo count($ingresos_efectivo); ?> transacciones</p>
+        </div>
+        <div class="mini-metric metric-qr">
+            <div class="mini-label">Ingresos QR</div>
+            <div class="mini-num text-blue-600 dark:text-blue-450">Bs. <?php echo formatMoney($total_qr); ?></div>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-semibold"><?php echo count($ingresos_qr); ?> transacciones</p>
+        </div>
+        <div class="mini-metric metric-egresos">
+            <div class="mini-label">Egresos (Gastos)</div>
+            <div class="mini-num text-red-650 dark:text-red-400">Bs. <?php echo formatMoney($total_egresos); ?></div>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-semibold"><?php echo count($egresos); ?> transacciones</p>
+        </div>
+        <div class="mini-metric metric-balance">
+            <div class="mini-label">Balance Neto Caja</div>
+            <div class="mini-num text-amber-600 dark:text-amber-500">Bs. <?php echo formatMoney($balance_recepcionista); ?></div>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-semibold">Efectivo a liquidar</p>
+        </div>
     </div>
 
-    <!-- Resumen Ejecutivo (solo pantalla) -->
-    <div class="summary-cards grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4 text-xs">
-        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded p-2">
-            <p class="text-green-700 dark:text-green-400 font-semibold mb-1 text-[10px] md:text-xs">Ingresos Efectivo</p>
-            <p class="text-sm md:text-lg font-bold text-green-900 dark:text-green-300">Bs. <?php echo formatMoney($total_efectivo); ?></p>
-            <p class="text-[9px] md:text-[10px] text-green-600 dark:text-green-500"><?php echo count($ingresos_efectivo); ?> transac.</p>
-        </div>
-        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded p-2">
-            <p class="text-blue-700 dark:text-blue-400 font-semibold mb-1 text-[10px] md:text-xs">Ingresos QR</p>
-            <p class="text-sm md:text-lg font-bold text-blue-900 dark:text-blue-300">Bs. <?php echo formatMoney($total_qr); ?></p>
-            <p class="text-[9px] md:text-[10px] text-blue-600 dark:text-blue-500"><?php echo count($ingresos_qr); ?> transac.</p>
-        </div>
-        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-2">
-            <p class="text-red-700 dark:text-red-400 font-semibold mb-1 text-[10px] md:text-xs">Egresos</p>
-            <p class="text-sm md:text-lg font-bold text-red-900 dark:text-red-300">Bs. <?php echo formatMoney($total_egresos); ?></p>
-            <p class="text-[9px] md:text-[10px] text-red-600 dark:text-red-500"><?php echo count($egresos); ?> transac.</p>
-        </div>
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded p-2">
-            <p class="text-yellow-700 dark:text-yellow-400 font-semibold mb-1 text-[10px] md:text-xs">Balance Caja</p>
-            <p class="text-sm md:text-lg font-bold text-yellow-900 dark:text-yellow-300">Bs. <?php echo formatMoney($balance_recepcionista); ?></p>
-            <p class="text-[9px] md:text-[10px] text-yellow-600 dark:text-yellow-500">A entregar</p>
-        </div>
-    </div>
-    
-    <!-- Resumen Ejecutivo formal (solo impresión) -->
-    <table class="summary-table w-full text-xs mb-4" style="display: none; border-collapse: collapse;">
-        <thead>
-            <tr style="background-color: #e8e8e8; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-                <th style="border: 1px solid #000; padding: 0.15cm; text-align: left; font-weight: bold;">CONCEPTO</th>
-                <th style="border: 1px solid #000; padding: 0.15cm; text-align: center; font-weight: bold;">TRANSACCIONES</th>
-                <th style="border: 1px solid #000; padding: 0.15cm; text-align: right; font-weight: bold;">MONTO (Bs.)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr style="background-color: #d1fae5;">
-                <td style="border: 1px solid #000; padding: 0.1cm;">Ingresos en Efectivo</td>
-                <td style="border: 1px solid #000; padding: 0.1cm; text-align: center;"><?php echo count($ingresos_efectivo); ?></td>
-                <td style="border: 1px solid #000; padding: 0.1cm; text-align: right; font-weight: 600; color: #065f46;"><?php echo formatMoney($total_efectivo); ?></td>
-            </tr>
-            <tr style="background-color: #dbeafe;">
-                <td style="border: 1px solid #000; padding: 0.1cm;">Ingresos por QR (Banco)</td>
-                <td style="border: 1px solid #000; padding: 0.1cm; text-align: center;"><?php echo count($ingresos_qr); ?></td>
-                <td style="border: 1px solid #000; padding: 0.1cm; text-align: right; font-weight: 600; color: #1e40af;"><?php echo formatMoney($total_qr); ?></td>
-            </tr>
-            <tr style="background-color: #fee2e2;">
-                <td style="border: 1px solid #000; padding: 0.1cm;">Egresos (Gastos)</td>
-                <td style="border: 1px solid #000; padding: 0.1cm; text-align: center;"><?php echo count($egresos); ?></td>
-                <td style="border: 1px solid #000; padding: 0.1cm; text-align: right; font-weight: 600; color: #b91c1c;"><?php echo formatMoney($total_egresos); ?></td>
-            </tr>
-            <tr style="background-color: #fef3c7; font-weight: bold;">
-                <td style="border: 1px solid #000; padding: 0.1cm; font-weight: bold;" colspan="2">BALANCE DE CAJA (A Entregar)</td>
-                <td style="border: 1px solid #000; padding: 0.1cm; text-align: right; font-size: 10pt; font-weight: bold; color: #92400e;"><?php echo formatMoney($balance_recepcionista); ?></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <!-- SECCIÓN 1: INGRESOS EN EFECTIVO -->
-    <div class="mb-4">
-        <div class="bg-green-600 text-white px-2 md:px-3 py-1.5 mb-2 flex flex-col md:flex-row md:items-center md:justify-between gap-1">
-            <h3 class="text-xs md:text-sm font-bold">1. INGRESOS EN EFECTIVO</h3>
-            <span class="text-[10px] md:text-xs opacity-90 hidden md:inline">Dinero físico manejado por el recepcionista</span>
-        </div>
+    <!-- 1. INGRESOS EN EFECTIVO -->
+    <div class="mb-8">
+        <div class="section-divider">1. Ingresos en Efectivo</div>
         
         <div class="table-responsive">
-            <table class="w-full compact-table border border-gray-300 dark:border-gray-700">
-            <thead class="bg-gray-100 dark:bg-gray-800">
-                <tr>
-                    <th class="text-left border-b border-gray-300 dark:border-gray-700">Fecha</th>
-                    <th class="text-left border-b border-gray-300 dark:border-gray-700">Concepto/Descripción</th>
-                    <th class="text-center border-b border-gray-300 dark:border-gray-700">Hab.</th>
-                    <th class="text-left border-b border-gray-300 dark:border-gray-700">Huésped</th>
-                    <th class="text-right border-b border-gray-300 dark:border-gray-700">Monto (Bs.)</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-900 dark:text-gray-300">
-                <?php if (empty($ingresos_efectivo)): ?>
+            <table class="premium-table">
+                <thead>
                     <tr>
-                        <td colspan="5" class="text-center py-3 text-gray-500 dark:text-gray-400 italic">Sin movimientos en efectivo</td>
+                        <th style="width: 15%">Fecha</th>
+                        <th style="width: 35%">Concepto / Detalle</th>
+                        <th style="width: 10%; text-align: center;">Habit.</th>
+                        <th style="width: 25%">Huésped</th>
+                        <th style="width: 15%; text-align: right;">Monto (Bs.)</th>
                     </tr>
-                <?php else: ?>
-                    <?php foreach ($ingresos_efectivo as $ing): ?>
-                        <tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                            <td class="whitespace-nowrap"><?php echo date('d/m/Y', strtotime($ing['fecha'])); ?></td>
-                            <td><?php echo htmlspecialchars($ing['concepto']); ?></td>
-                            <td class="text-center"><?php echo $ing['nro_pieza'] ?? '-'; ?></td>
-                            <td class="text-xs"><?php echo $ing['nombres_apellidos'] ? htmlspecialchars($ing['nombres_apellidos']) : '-'; ?></td>
-                            <td class="text-right font-semibold"><?php echo formatMoney($ing['monto']); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    <tr class="bg-green-100 dark:bg-green-900/30 font-bold">
-                        <td colspan="4" class="text-right py-2">SUBTOTAL EFECTIVO:</td>
-                        <td class="text-right">Bs. <?php echo formatMoney($total_efectivo); ?></td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-        </div>
-    </div>
-
-    <!-- SECCIÓN 2: INGRESOS POR QR -->
-    <div class="mb-4">
-        <div class="bg-blue-600 text-white px-2 md:px-3 py-1.5 mb-2 flex flex-col md:flex-row md:items-center md:justify-between gap-1">
-            <h3 class="text-xs md:text-sm font-bold">2. INGRESOS POR QR</h3>
-            <span class="text-[10px] md:text-xs opacity-90 hidden md:inline">Transferencias bancarias directas</span>
-        </div>
-        
-        <div class="table-responsive">
-            <table class="w-full compact-table border border-gray-300 dark:border-gray-700">
-            <thead class="bg-gray-100 dark:bg-gray-800">
-                <tr>
-                    <th class="text-left border-b border-gray-300 dark:border-gray-700">Fecha</th>
-                    <th class="text-left border-b border-gray-300 dark:border-gray-700">Concepto/Descripción</th>
-                    <th class="text-center border-b border-gray-300 dark:border-gray-700">Hab.</th>
-                    <th class="text-left border-b border-gray-300 dark:border-gray-700">Huésped</th>
-                    <th class="text-right border-b border-gray-300 dark:border-gray-700">Monto (Bs.)</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-900 dark:text-gray-300">
-                <?php if (empty($ingresos_qr)): ?>
-                    <tr>
-                        <td colspan="5" class="text-center py-3 text-gray-500 dark:text-gray-400 italic">Sin pagos QR registrados</td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($ingresos_qr as $ing): ?>
-                        <tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                            <td class="whitespace-nowrap"><?php echo date('d/m/Y', strtotime($ing['fecha'])); ?></td>
-                            <td><?php echo htmlspecialchars($ing['concepto']); ?></td>
-                            <td class="text-center"><?php echo $ing['nro_pieza'] ?? '-'; ?></td>
-                            <td class="text-xs"><?php echo $ing['nombres_apellidos'] ? htmlspecialchars($ing['nombres_apellidos']) : '-'; ?></td>
-                            <td class="text-right font-semibold"><?php echo formatMoney($ing['monto']); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    <tr class="bg-blue-100 dark:bg-blue-900/30 font-bold">
-                        <td colspan="4" class="text-right py-2">SUBTOTAL QR (YA EN BANCO):</td>
-                        <td class="text-right">Bs. <?php echo formatMoney($total_qr); ?></td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-        </div>
-    </div>
-
-    <!-- SECCIÓN 3: EGRESOS -->
-    <div class="mb-4">
-        <div class="bg-red-600 text-white px-2 md:px-3 py-1.5 mb-2 flex flex-col md:flex-row md:items-center md:justify-between gap-1">
-            <h3 class="text-xs md:text-sm font-bold">3. EGRESOS</h3>
-            <span class="text-[10px] md:text-xs opacity-90 hidden md:inline">Salidas de caja del recepcionista</span>
-        </div>
-        
-        <div class="table-responsive">
-            <table class="w-full compact-table border border-gray-300 dark:border-gray-700">
-            <thead class="bg-gray-100 dark:bg-gray-800">
-                <tr>
-                    <th class="text-left border-b border-gray-300 dark:border-gray-700">Fecha</th>
-                    <th class="text-left border-b border-gray-300 dark:border-gray-700">Categoría</th>
-                    <th class="text-left border-b border-gray-300 dark:border-gray-700">Descripción del Gasto</th>
-                    <th class="text-right border-b border-gray-300 dark:border-gray-700">Monto (Bs.)</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-900 dark:text-gray-300">
-                <?php if (empty($egresos)): ?>
-                    <tr>
-                        <td colspan="4" class="text-center py-3 text-gray-500 dark:text-gray-400 italic">Sin egresos registrados</td>
-                    </tr>
-                <?php else: ?>
-                    <?php 
-                    $egresos_por_categoria = [];
-                    foreach ($egresos as $egr) {
-                        $cat = $egr['categoria'] ?? 'Sin categoría';
-                        if (!isset($egresos_por_categoria[$cat])) {
-                            $egresos_por_categoria[$cat] = 0;
-                        }
-                        $egresos_por_categoria[$cat] += $egr['monto'];
-                    ?>
-                        <tr class="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                            <td class="whitespace-nowrap"><?php echo date('d/m/Y', strtotime($egr['fecha'])); ?></td>
-                            <td class="text-xs"><?php echo htmlspecialchars($cat); ?></td>
-                            <td><?php echo htmlspecialchars($egr['concepto']); ?></td>
-                            <td class="text-right font-semibold"><?php echo formatMoney($egr['monto']); ?></td>
-                        </tr>
-                    <?php } ?>
-                    <tr class="bg-red-100 dark:bg-red-900/30 font-bold">
-                        <td colspan="3" class="text-right py-2">TOTAL EGRESOS:</td>
-                        <td class="text-right">Bs. <?php echo formatMoney($total_egresos); ?></td>
-                    </tr>
-                    <tr class="bg-gray-50 dark:bg-gray-800 text-xs">
-                        <td colspan="4" class="py-2 px-3">
-                            <strong>Desglose por categoría:</strong>
-                            <?php foreach ($egresos_por_categoria as $cat => $monto): ?>
-                                <span class="inline-block mr-3"><?php echo htmlspecialchars($cat); ?>: Bs. <?php echo formatMoney($monto); ?></span>
-                            <?php endforeach; ?>
-                        </td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-        </div>
-    </div>
-
-    <!-- RESUMEN CONSOLIDADO Y LIQUIDACIÓN -->
-    <div class="mb-3 border border-gray-800 dark:border-gray-600" style="border: 1px solid #000;">
-        <div class="bg-gray-800 dark:bg-gray-700 text-white px-3 py-1">
-            <h3 class="text-xs font-bold uppercase tracking-wide">4. Resumen y Liquidación Final</h3>
-        </div>
-        
-        <div class="p-2 sm:p-3">
-            <table class="w-full text-[10px] sm:text-xs">
+                </thead>
                 <tbody>
-                    <tr class="border-b border-gray-200 dark:border-gray-700">
-                        <td class="py-1 text-gray-700 dark:text-gray-300">Ingresos Efectivo (Caja)</td>
-                        <td class="py-1 text-right font-semibold text-green-600 dark:text-green-400">+ Bs. <?php echo formatMoney($total_efectivo); ?></td>
+                    <?php if (empty($ingresos_efectivo)): ?>
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-gray-500 italic">Sin movimientos registrados en efectivo</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($ingresos_efectivo as $ing): ?>
+                            <tr>
+                                <td class="whitespace-nowrap font-semibold text-gray-700 dark:text-gray-300"><?php echo date('d/m/Y', strtotime($ing['fecha'])); ?></td>
+                                <td><?php echo htmlspecialchars($ing['concepto']); ?></td>
+                                <td class="text-center font-bold text-gray-900 dark:text-white"><?php echo $ing['nro_pieza'] ?? '-'; ?></td>
+                                <td class="text-gray-500 dark:text-gray-400 font-medium"><?php echo $ing['nombres_apellidos'] ? htmlspecialchars($ing['nombres_apellidos']) : '-'; ?></td>
+                                <td class="text-right font-bold text-emerald-600 dark:text-emerald-400"><?php echo formatMoney($ing['monto']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        <tr class="bg-emerald-500/[0.03] dark:bg-emerald-500/[0.06] font-bold border-t border-emerald-100 dark:border-emerald-950">
+                            <td colspan="4" class="text-right py-3.5 pr-4 text-emerald-800 dark:text-emerald-450 uppercase tracking-wider text-[10px]">Total Recaudado Efectivo:</td>
+                            <td class="text-right text-emerald-600 dark:text-emerald-400 text-[14px]">Bs. <?php echo formatMoney($total_efectivo); ?></td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 2. INGRESOS POR QR -->
+    <div class="mb-8">
+        <div class="section-divider">2. Ingresos por Código QR</div>
+        
+        <div class="table-responsive">
+            <table class="premium-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Fecha</th>
+                        <th style="width: 35%">Concepto / Detalle</th>
+                        <th style="width: 10%; text-align: center;">Habit.</th>
+                        <th style="width: 25%">Huésped</th>
+                        <th style="width: 15%; text-align: right;">Monto (Bs.)</th>
                     </tr>
-                    <tr class="border-b border-gray-200 dark:border-gray-700">
-                        <td class="py-1 text-gray-700 dark:text-gray-300">Egresos (Gastos)</td>
-                        <td class="py-1 text-right font-semibold text-red-600 dark:text-red-400">- Bs. <?php echo formatMoney($total_egresos); ?></td>
+                </thead>
+                <tbody>
+                    <?php if (empty($ingresos_qr)): ?>
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-gray-500 italic">Sin transferencias QR registradas</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($ingresos_qr as $ing): ?>
+                            <tr>
+                                <td class="whitespace-nowrap font-semibold text-gray-700 dark:text-gray-300"><?php echo date('d/m/Y', strtotime($ing['fecha'])); ?></td>
+                                <td><?php echo htmlspecialchars($ing['concepto']); ?></td>
+                                <td class="text-center font-bold text-gray-900 dark:text-white"><?php echo $ing['nro_pieza'] ?? '-'; ?></td>
+                                <td class="text-gray-500 dark:text-gray-400 font-medium"><?php echo $ing['nombres_apellidos'] ? htmlspecialchars($ing['nombres_apellidos']) : '-'; ?></td>
+                                <td class="text-right font-bold text-blue-600 dark:text-blue-400"><?php echo formatMoney($ing['monto']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        <tr class="bg-blue-500/[0.03] dark:bg-blue-500/[0.06] font-bold border-t border-blue-100 dark:border-blue-950">
+                            <td colspan="4" class="text-right py-3.5 pr-4 text-blue-800 dark:text-blue-450 uppercase tracking-wider text-[10px]">Total Acreditado QR:</td>
+                            <td class="text-right text-blue-600 dark:text-blue-400 text-[14px]">Bs. <?php echo formatMoney($total_qr); ?></td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 3. EGRESOS -->
+    <div class="mb-8">
+        <div class="section-divider">3. Egresos (Gastos Operativos de Turno)</div>
+        
+        <div class="table-responsive">
+            <table class="premium-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Fecha</th>
+                        <th style="width: 25%">Categoría</th>
+                        <th style="width: 45%">Descripción del Gasto</th>
+                        <th style="width: 15%; text-align: right;">Monto (Bs.)</th>
                     </tr>
-                    <tr class="bg-yellow-50 dark:bg-yellow-900/10 border-y border-yellow-300 dark:border-yellow-800">
-                        <td class="py-1 sm:py-1.5 font-semibold text-yellow-800 dark:text-yellow-300">Efectivo a Entregar</td>
-                        <td class="py-1 sm:py-1.5 text-right font-bold text-base sm:text-lg text-yellow-800 dark:text-yellow-300">Bs. <?php echo formatMoney($balance_recepcionista); ?></td>
+                </thead>
+                <tbody>
+                    <?php if (empty($egresos)): ?>
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-gray-500 italic">Sin egresos cargados en el período</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php 
+                        $egresos_por_categoria = [];
+                        foreach ($egresos as $egr) {
+                            $cat = $egr['categoria'] ?? 'General';
+                            if (!isset($egresos_por_categoria[$cat])) {
+                                $egresos_por_categoria[$cat] = 0;
+                            }
+                            $egresos_por_categoria[$cat] += $egr['monto'];
+                        ?>
+                            <tr>
+                                <td class="whitespace-nowrap font-semibold text-gray-700 dark:text-gray-300"><?php echo date('d/m/Y', strtotime($egr['fecha'])); ?></td>
+                                <td class="text-gray-900 dark:text-white font-extrabold uppercase text-[10.5px] tracking-wide"><?php echo htmlspecialchars($cat); ?></td>
+                                <td class="text-gray-600 dark:text-gray-400 font-medium"><?php echo htmlspecialchars($egr['concepto']); ?></td>
+                                <td class="text-right font-bold text-red-650 dark:text-red-400"><?php echo formatMoney($egr['monto']); ?></td>
+                            </tr>
+                        <?php } ?>
+                        <tr class="bg-red-500/[0.03] dark:bg-red-500/[0.06] font-bold border-t border-red-100 dark:border-red-950">
+                            <td colspan="3" class="text-right py-3.5 pr-4 text-red-800 dark:text-red-455 uppercase tracking-wider text-[10px]">Total Egresos Reportados:</td>
+                            <td class="text-right text-red-650 dark:text-red-400 text-[14px]">Bs. <?php echo formatMoney($total_egresos); ?></td>
+                        </tr>
+                        <tr class="bg-gray-50 dark:bg-white/[0.01] text-xs">
+                            <td colspan="4" class="py-3 px-5 text-gray-500 border-t border-gray-100 dark:border-gray-800">
+                                <strong>Desglose consolidado:</strong>
+                                <?php foreach ($egresos_por_categoria as $cat => $monto): ?>
+                                    <span class="inline-block mr-5">· <?php echo htmlspecialchars($cat); ?>: <strong class="text-gray-850 dark:text-gray-300">Bs. <?php echo formatMoney($monto); ?></strong></span>
+                                <?php endforeach; ?>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 4. RESUMEN Y LIQUIDACIÓN CONSOLIDADO -->
+    <div class="mb-6">
+        <div class="section-divider">4. Resumen y Liquidación Final</div>
+        
+        <div class="border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
+            <table class="w-full text-xs sm:text-sm">
+                <tbody>
+                    <tr class="border-b border-gray-100 dark:border-gray-800">
+                        <td class="px-5 py-3.5 text-gray-600 dark:text-gray-400">Ingresos Efectivo (Caja física)</td>
+                        <td class="px-5 py-3.5 text-right font-bold text-emerald-600 dark:text-emerald-450 font-variant-numeric-tabular">+ Bs. <?php echo formatMoney($total_efectivo); ?></td>
                     </tr>
-                    <tr class="border-b border-gray-200 dark:border-gray-700">
-                        <td class="py-1 text-gray-600 dark:text-gray-400 text-[9px] sm:text-xs">Ingresos QR (Banco Sol)</td>
-                        <td class="py-1 text-right font-semibold text-blue-600 dark:text-blue-400">Bs. <?php echo formatMoney($total_qr); ?></td>
+                    <tr class="border-b border-gray-100 dark:border-gray-800">
+                        <td class="px-5 py-3.5 text-gray-600 dark:text-gray-400">Egresos de Caja (Gastos autorizados)</td>
+                        <td class="px-5 py-3.5 text-right font-bold text-red-650 dark:text-red-450 font-variant-numeric-tabular">- Bs. <?php echo formatMoney($total_egresos); ?></td>
                     </tr>
-                    <tr class="bg-gray-50 dark:bg-gray-800 border-t border-gray-300 dark:border-gray-700">
-                        <td class="py-1 sm:py-1.5 font-semibold text-gray-900 dark:text-white">Ingreso Bruto Total</td>
-                        <td class="py-1 sm:py-1.5 text-right font-bold text-sm sm:text-base text-gray-900 dark:text-white">Bs. <?php echo formatMoney($total_efectivo + $total_qr); ?></td>
+                    <tr class="bg-amber-500/[0.04] dark:bg-amber-500/[0.1] border-y border-amber-200 dark:border-amber-900/40">
+                        <td class="px-5 py-4 font-extrabold text-amber-800 dark:text-amber-300 uppercase tracking-wider text-[11px]">Efectivo Neto a Entregar:</td>
+                        <td class="px-5 py-4 text-right font-extrabold text-lg text-amber-800 dark:text-amber-300 font-variant-numeric-tabular">Bs. <?php echo formatMoney($balance_recepcionista); ?></td>
                     </tr>
-                    <tr class="bg-green-50 dark:bg-green-900/10">
-                        <td class="py-1 sm:py-1.5 font-semibold text-green-800 dark:text-green-300">Utilidad Neta</td>
-                        <td class="py-1 sm:py-1.5 text-right font-bold text-sm sm:text-base text-green-700 dark:text-green-400">Bs. <?php echo formatMoney($total_efectivo + $total_qr - $total_egresos); ?></td>
+                    <tr class="border-b border-gray-100 dark:border-gray-800">
+                        <td class="px-5 py-3.5 text-gray-500">Ingresos por Código QR (Acreditado en Banco)</td>
+                        <td class="px-5 py-3.5 text-right font-semibold text-blue-600 dark:text-blue-400 font-variant-numeric-tabular">Bs. <?php echo formatMoney($total_qr); ?></td>
+                    </tr>
+                    <tr class="bg-gray-50 dark:bg-white/[0.02] border-t border-gray-200 dark:border-gray-800 font-bold">
+                        <td class="px-5 py-3.5 text-gray-900 dark:text-white uppercase tracking-wider text-[10px]">Ingreso Bruto Total:</td>
+                        <td class="px-5 py-3.5 text-right font-extrabold text-base text-gray-900 dark:text-white font-variant-numeric-tabular">Bs. <?php echo formatMoney($total_efectivo + $total_qr); ?></td>
+                    </tr>
+                    <tr class="bg-emerald-500/[0.04] dark:bg-emerald-500/[0.1] font-bold text-emerald-800 dark:text-emerald-450">
+                        <td class="px-5 py-3.5 uppercase tracking-wider text-[10px]">Utilidad de Operación Neta:</td>
+                        <td class="px-5 py-3.5 text-right font-extrabold text-base font-variant-numeric-tabular">Bs. <?php echo formatMoney($total_efectivo + $total_qr - $total_egresos); ?></td>
                     </tr>
                 </tbody>
             </table>
@@ -897,71 +685,67 @@ include __DIR__ . '/../../includes/header.php';
     </div>
 
     <!-- FIRMAS Y VALIDACIÓN -->
-    <div class="signature-section mt-6 pt-3" style="border-top: 1px solid #000; margin-top: 0.5cm; padding-top: 0.3cm; text-align: center;">
-        <p style="font-size: 8pt; margin-bottom: 0.8cm;">
-            Yo, <strong>Rodolfo Moscoso</strong>, recibo <strong>Bs. <?php echo formatMoney($balance_recepcionista); ?></strong> 
-            desde la fecha <strong><?php echo date('d/m/Y', strtotime($fecha_inicio)); ?></strong> 
-            hasta la fecha <strong><?php echo date('d/m/Y', strtotime($fecha_fin)); ?></strong>
+    <div class="signature-section mt-8 pt-5 text-center">
+        <p class="text-xs text-gray-700 dark:text-gray-400 font-medium">
+            Yo, <strong>Rodolfo Moscoso</strong>, recibo de conformidad el importe líquido de <strong>Bs. <?php echo formatMoney($balance_recepcionista); ?></strong> 
+            correspondiente a los turnos del <strong><?php echo date('d/m/Y', strtotime($fecha_inicio)); ?></strong> 
+            al <strong><?php echo date('d/m/Y', strtotime($fecha_fin)); ?></strong>.
         </p>
-        <div style="margin: 1.5cm auto 0 auto; border-top: 1px solid #000; width: 40%; text-align: center; padding-top: 0.1cm; font-size: 7pt;">
-            Firma
+        <div class="mt-14 mx-auto border-t border-gray-450 dark:border-gray-700 pt-2 text-[10px] uppercase font-bold tracking-widest text-gray-400 w-64">
+            Firma Auditor / Receptor
         </div>
     </div>
 
 </div>
 
-<!-- Vista rápida en pantalla (no se imprime) -->
+<!-- Screen Quick Overview Grid (Hidden on print) -->
 <div class="no-print mt-8">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <!-- Efectivo (Caja) -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="apple-card hover:translate-y-[-2px] transition duration-200">
             <div class="flex items-center justify-between mb-4">
-                <span class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 font-medium">Efectivo (Caja)</span>
-                <i class="fas fa-money-bill-wave text-gray-400 dark:text-gray-500 text-sm"></i>
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Efectivo en Caja</span>
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
             </div>
-            <p class="text-3xl font-semibold text-gray-900 dark:text-white">Bs. <?php echo formatMoney($total_efectivo); ?></p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Ingresos en efectivo</p>
+            <p class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight font-variant-numeric-tabular">Bs. <?php echo formatMoney($total_efectivo); ?></p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Monto recaudado físicamente en caja</p>
         </div>
 
-        <!-- QR (Don Rodolfo) -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+        <div class="apple-card hover:translate-y-[-2px] transition duration-200">
             <div class="flex items-center justify-between mb-4">
-                <span class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 font-medium">QR (Don Rodolfo)</span>
-                <i class="fas fa-qrcode text-gray-400 dark:text-gray-500 text-sm"></i>
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">QR Don Rodolfo</span>
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
-            <p class="text-3xl font-semibold text-gray-900 dark:text-white">Bs. <?php echo formatMoney($total_qr); ?></p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Pagos directos a Don Rodolfo</p>
+            <p class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight font-variant-numeric-tabular">Bs. <?php echo formatMoney($total_qr); ?></p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Depósitos bancarios directos por QR</p>
         </div>
 
-        <!-- A Entregar -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+        <div class="apple-card hover:translate-y-[-2px] transition duration-200">
             <div class="flex items-center justify-between mb-4">
-                <span class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 font-medium">A Entregar</span>
-                <i class="fas fa-hand-holding-usd text-gray-400 dark:text-gray-500 text-sm"></i>
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Líquido a Entregar</span>
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
             </div>
-            <p class="text-3xl font-semibold text-gray-900 dark:text-white">Bs. <?php echo formatMoney($balance_recepcionista); ?></p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Efectivo - Egresos</p>
+            <p class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight font-variant-numeric-tabular">Bs. <?php echo formatMoney($balance_recepcionista); ?></p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Total en caja física neto de egresos</p>
         </div>
     </div>
 </div>
 
 <script>
 function toggleRecepcionistaOtro() {
-    const selectElement = document.getElementById('recepcionista_select');
-    const otroDiv = document.getElementById('recepcionista_otro_div');
-    const otroInput = document.getElementById('recepcionista_otro_input');
+    const select = document.getElementById('recepcionista_select');
+    const div = document.getElementById('recepcionista_otro_div');
+    const input = document.getElementById('recepcionista_otro_input');
     
-    if (selectElement.value === 'otro') {
-        otroDiv.style.display = 'block';
-        otroInput.required = true;
-        otroInput.focus();
+    if (select.value === 'otro') {
+        div.style.display = 'block';
+        input.required = true;
+        input.focus();
     } else {
-        otroDiv.style.display = 'none';
-        otroInput.required = false;
+        div.style.display = 'none';
+        input.required = false;
     }
 }
 
-// Ejecutar al cargar la página por si viene con "otro" seleccionado
 document.addEventListener('DOMContentLoaded', function() {
     toggleRecepcionistaOtro();
 });

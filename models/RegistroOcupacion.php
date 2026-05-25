@@ -179,27 +179,25 @@ class RegistroOcupacion {
     /**
      * Verifica automáticamente las fechas de salida estimadas
      * y cambia habitaciones a "limpieza" cuando el huésped debe salir
-     * Considera la hora de checkout a las 12:00 PM (mediodía)
+     * Considera la hora de checkout a las 12:00 PM del día siguiente a la fecha estimada
      */
     public function verificarSalidasAutomaticas() {
         try {
             // Obtener ocupaciones activas donde la fecha y hora de salida ya pasaron
-            // Se agrega 12 horas (mediodía) a la fecha de salida estimada para el checkout
+            // Se suma 1 día + 12 horas (mediodía) a la fecha de salida estimada
             $sql = "SELECT ro.*, hab.id as habitacion_id 
                     FROM registro_ocupacion ro
                     INNER JOIN habitaciones hab ON ro.habitacion_id = hab.id
                     WHERE ro.estado = 'activo' 
-                    AND DATE_ADD(ro.fecha_salida_estimada, INTERVAL 12 HOUR) <= NOW()";
+                    AND DATE_ADD(ro.fecha_salida_estimada, INTERVAL 36 HOUR) <= NOW()";
             
             $stmt = $this->conn->prepare($sql);
             $stmt->execute();
             $ocupaciones_vencidas = $stmt->fetchAll();
             
             foreach ($ocupaciones_vencidas as $ocupacion) {
-                // Finalizar la ocupación
-                // finalizarOcupacion() ya se encarga de verificar si hay otros huéspedes
-                // y cambiar el estado apropiadamente (ocupada o limpieza)
-                $this->finalizarOcupacion($ocupacion['id'], date('Y-m-d'), true);
+                // Finalizar la ocupación con hora actual
+                $this->finalizarOcupacion($ocupacion['id'], date('Y-m-d H:i:s'), true);
             }
             
             return count($ocupaciones_vencidas);

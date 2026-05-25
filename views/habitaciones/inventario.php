@@ -13,55 +13,59 @@ $inventario->inicializarHabitaciones($numeros);
 
 // Procesar actualización masiva
 $mensaje = '';
+$tipo_mensaje = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_masivo'])) {
     // Solo administradores pueden hacer actualización masiva
     if (!esAdmin()) {
-        $mensaje = "⚠ No tienes permisos para realizar esta acción";
+        $mensaje = "No tienes suficientes permisos para realizar esta acción";
+        $tipo_mensaje = "danger";
     } else {
         $habitaciones_data = $_POST['hab'] ?? [];
         $errores = 0;
         $actualizados = 0;
     
-    foreach ($habitaciones_data as $numero => $datos) {
-        $datos_completos = [
-            'habitacion_numero' => $numero,
-            'tipo' => 'habitacion',
-            'cortinas' => intval($datos['cortinas'] ?? 0),
-            'veladores' => intval($datos['veladores'] ?? 0),
-            'roperos' => intval($datos['roperos'] ?? 0),
-            'colgadores' => intval($datos['colgadores'] ?? 0),
-            'basureros' => intval($datos['basureros'] ?? 0),
-            'shampoo' => intval($datos['shampoo'] ?? 0),
-            'jabon_liquido' => intval($datos['jabon_liquido'] ?? 0),
-            'sillas' => intval($datos['sillas'] ?? 0),
-            'sillones' => intval($datos['sillones'] ?? 0),
-            'alfombras' => intval($datos['alfombras'] ?? 0),
-            'camas' => intval($datos['camas'] ?? 0),
-            'television' => intval($datos['television'] ?? 0),
-            'lamparas' => intval($datos['lamparas'] ?? 0),
-            'manteles' => 0,
-            'cubrecamas' => 0,
-            'sabanas_media_plaza' => 0,
-            'sabanas_doble_plaza' => 0,
-            'almohadas' => 0,
-            'fundas' => 0,
-            'frazadas' => 0,
-            'toallas' => 0,
-            'cortinas_almacen' => 0,
-            'alfombras_almacen' => 0
-        ];
-        
-        if ($inventario->guardar($datos_completos)) {
-            $actualizados++;
-        } else {
-            $errores++;
+        foreach ($habitaciones_data as $numero => $datos) {
+            $datos_completos = [
+                'habitacion_numero' => $numero,
+                'tipo' => 'habitacion',
+                'cortinas' => intval($datos['cortinas'] ?? 0),
+                'veladores' => intval($datos['veladores'] ?? 0),
+                'roperos' => intval($datos['roperos'] ?? 0),
+                'colgadores' => intval($datos['colgadores'] ?? 0),
+                'basureros' => intval($datos['basureros'] ?? 0),
+                'shampoo' => intval($datos['shampoo'] ?? 0),
+                'jabon_liquido' => intval($datos['jabon_liquido'] ?? 0),
+                'sillas' => intval($datos['sillas'] ?? 0),
+                'sillones' => intval($datos['sillones'] ?? 0),
+                'alfombras' => intval($datos['alfombras'] ?? 0),
+                'camas' => intval($datos['camas'] ?? 0),
+                'television' => intval($datos['television'] ?? 0),
+                'lamparas' => intval($datos['lamparas'] ?? 0),
+                'manteles' => 0,
+                'cubrecamas' => 0,
+                'sabanas_media_plaza' => 0,
+                'sabanas_doble_plaza' => 0,
+                'almohadas' => 0,
+                'fundas' => 0,
+                'frazadas' => 0,
+                'toallas' => 0,
+                'cortinas_almacen' => 0,
+                'alfombras_almacen' => 0
+            ];
+            
+            if ($inventario->guardar($datos_completos)) {
+                $actualizados++;
+            } else {
+                $errores++;
+            }
         }
-    }
     
         if ($errores === 0) {
-            $mensaje = "✓ Inventario actualizado: {$actualizados} habitaciones";
+            $mensaje = "Inventario masivo actualizado correctamente para {$actualizados} habitaciones.";
+            $tipo_mensaje = "success";
         } else {
-            $mensaje = "⚠ Actualizado: {$actualizados} habitaciones, {$errores} errores";
+            $mensaje = "Se actualizaron {$actualizados} habitaciones, pero ocurrieron {$errores} errores.";
+            $tipo_mensaje = "warning";
         }
     }
 }
@@ -73,41 +77,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_inventario'])
     
     // Solo administradores pueden editar el almacén
     if ($tipo === 'almacen' && !esAdmin()) {
-        $mensaje = "⚠ No tienes permisos para editar el almacén";
+        $mensaje = "No tienes suficientes permisos para editar el almacén";
+        $tipo_mensaje = "danger";
     } else {
-    
-    $datos = [
-        'habitacion_numero' => $habitacion_numero,
-        'tipo' => $_POST['tipo'] ?? 'habitacion',
-        'cortinas' => intval($_POST['cortinas'] ?? 0),
-        'veladores' => intval($_POST['veladores'] ?? 0),
-        'roperos' => intval($_POST['roperos'] ?? 0),
-        'colgadores' => intval($_POST['colgadores'] ?? 0),
-        'basureros' => intval($_POST['basureros'] ?? 0),
-        'shampoo' => intval($_POST['shampoo'] ?? 0),
-        'jabon_liquido' => intval($_POST['jabon_liquido'] ?? 0),
-        'sillas' => intval($_POST['sillas'] ?? 0),
-        'sillones' => intval($_POST['sillones'] ?? 0),
-        'alfombras' => intval($_POST['alfombras'] ?? 0),
-        'camas' => intval($_POST['camas'] ?? 0),
-        'television' => intval($_POST['television'] ?? 0),
-        'lamparas' => intval($_POST['lamparas'] ?? 0),
-        'manteles' => intval($_POST['manteles'] ?? 0),
-        'cubrecamas' => intval($_POST['cubrecamas'] ?? 0),
-        'sabanas_media_plaza' => intval($_POST['sabanas_media_plaza'] ?? 0),
-        'sabanas_doble_plaza' => intval($_POST['sabanas_doble_plaza'] ?? 0),
-        'almohadas' => intval($_POST['almohadas'] ?? 0),
-        'fundas' => intval($_POST['fundas'] ?? 0),
-        'frazadas' => intval($_POST['frazadas'] ?? 0),
-        'toallas' => intval($_POST['toallas'] ?? 0),
-        'cortinas_almacen' => intval($_POST['cortinas_almacen'] ?? 0),
-        'alfombras_almacen' => intval($_POST['alfombras_almacen'] ?? 0)
-    ];
-    
+        $datos = [
+            'habitacion_numero' => $habitacion_numero,
+            'tipo' => $_POST['tipo'] ?? 'habitacion',
+            'cortinas' => intval($_POST['cortinas'] ?? 0),
+            'veladores' => intval($_POST['veladores'] ?? 0),
+            'roperos' => intval($_POST['roperos'] ?? 0),
+            'colgadores' => intval($_POST['colgadores'] ?? 0),
+            'basureros' => intval($_POST['basureros'] ?? 0),
+            'shampoo' => intval($_POST['shampoo'] ?? 0),
+            'jabon_liquido' => intval($_POST['jabon_liquido'] ?? 0),
+            'sillas' => intval($_POST['sillas'] ?? 0),
+            'sillones' => intval($_POST['sillones'] ?? 0),
+            'alfombras' => intval($_POST['alfombras'] ?? 0),
+            'camas' => intval($_POST['camas'] ?? 0),
+            'television' => intval($_POST['television'] ?? 0),
+            'lamparas' => intval($_POST['lamparas'] ?? 0),
+            'manteles' => intval($_POST['manteles'] ?? 0),
+            'cubrecamas' => intval($_POST['cubrecamas'] ?? 0),
+            'sabanas_media_plaza' => intval($_POST['sabanas_media_plaza'] ?? 0),
+            'sabanas_doble_plaza' => intval($_POST['sabanas_doble_plaza'] ?? 0),
+            'almohadas' => intval($_POST['almohadas'] ?? 0),
+            'fundas' => intval($_POST['fundas'] ?? 0),
+            'frazadas' => intval($_POST['frazadas'] ?? 0),
+            'toallas' => intval($_POST['toallas'] ?? 0),
+            'cortinas_almacen' => intval($_POST['cortinas_almacen'] ?? 0),
+            'alfombras_almacen' => intval($_POST['alfombras_almacen'] ?? 0)
+        ];
+        
         if ($inventario->guardar($datos)) {
-            $mensaje = "✓ Inventario actualizado correctamente";
+            $mensaje = "Inventario actualizado correctamente.";
+            $tipo_mensaje = "success";
         } else {
-            $mensaje = "✗ Error al actualizar inventario";
+            $mensaje = "Error al intentar guardar los datos de inventario.";
+            $tipo_mensaje = "danger";
         }
     }
 }
@@ -139,473 +145,579 @@ if (!$almacen) {
 include __DIR__ . '/../../includes/header.php';
 ?>
 
+<style>
+/* ═══════════════════════════════════════════════
+   Apple Premium Room Inventory Aesthetic
+   ═══════════════════════════════════════════════ */
+
+:root {
+    --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: #f5f5f7;
+    font-family: var(--apple-font);
+    color: #1d1d1f;
+}
+
+.apple-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.012);
+    padding: 24px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.024);
+}
+
+.dark .apple-card {
+    background: #161616;
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Almacen Special Card styling */
+.almacen-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 20px;
+    padding: 24px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .almacen-card {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Grid mini boxes for Almacén items */
+.stock-box {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+.dark .stock-box {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.02);
+}
+
+.stock-box:hover {
+    transform: translateY(-1.5px);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+.dark .stock-box:hover {
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.stock-label {
+    font-size: 11px;
+    color: #86868b;
+    font-weight: 550;
+    margin-bottom: 2px;
+}
+
+.dark .stock-label {
+    color: #aeaeb2;
+}
+
+.stock-num {
+    font-size: 18px;
+    font-weight: 750;
+    color: #1d1d1f;
+    font-variant-numeric: tabular-nums;
+}
+
+.dark .stock-num {
+    color: #ffffff;
+}
+
+/* Premium Form Inputs */
+.apple-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    color: #1d1d1f;
+}
+
+.apple-input:focus {
+    outline: none;
+    border-color: #0071e3;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.12);
+}
+
+.dark .apple-input {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f5f5f7;
+}
+
+.dark .apple-input:focus {
+    background: #1c1c1e;
+    border-color: #0071e3;
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.25);
+}
+
+/* Premium Modals */
+.modal-overlay {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.modal-sheet {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+}
+
+.dark .modal-sheet {
+    background: #1c1c1e;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+/* Clean Spreadsheet-like Table */
+.spreadsheet-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+}
+
+.spreadsheet-table th {
+    background: #f5f5f7;
+    color: #86868b;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    padding: 10px 8px;
+    text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dark .spreadsheet-table th {
+    background: rgba(255, 255, 255, 0.03);
+    color: #aeaeb2;
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.spreadsheet-table td {
+    padding: 6px 4px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: #1d1d1f;
+    text-align: center;
+}
+
+.dark .spreadsheet-table td {
+    color: #f5f5f7;
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.spreadsheet-table tr:hover td {
+    background: rgba(0, 0, 0, 0.005);
+}
+
+.dark .spreadsheet-table tr:hover td {
+    background: rgba(255, 255, 255, 0.005);
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dark .table-responsive {
+    border-color: rgba(255, 255, 255, 0.06);
+}
+</style>
+
 <div class="container mx-auto px-4 py-8">
-    <div class="mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-            <div class="flex-1">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Inventario de Habitaciones</h1>
-                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 sm:mt-2">Control físico de elementos en cada habitación</p>
+    
+    <!-- Title Header -->
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-1">Inventario de Habitaciones</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Control físico y auditoría de los elementos en cada habitación y almacén</p>
             </div>
             <?php if (esAdmin()): ?>
-            <button onclick="toggleEdicionMasiva()" 
-                    class="px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-                <i class="fas fa-table mr-2"></i>Edición Masiva
+            <button onclick="toggleEdicionMasiva()" class="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-white text-white dark:text-gray-900 text-sm font-semibold rounded-xl transition duration-200 shadow-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                Edición Masiva
             </button>
             <?php endif; ?>
         </div>
     </div>
 
+    <!-- Alert Notices -->
     <?php if ($mensaje): ?>
-    <div class="mb-6 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 rounded-lg shadow-sm">
+    <div class="mb-6 p-4 rounded-xl border <?php 
+        if ($tipo_mensaje === 'success') echo 'bg-green-50/80 dark:bg-green-950/20 text-green-800 dark:text-green-300 border-green-100 dark:border-green-900/30';
+        elseif ($tipo_mensaje === 'warning') echo 'bg-amber-50/80 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300 border-amber-100 dark:border-amber-900/30';
+        else echo 'bg-red-50/80 dark:bg-red-950/20 text-red-800 dark:text-red-300 border-red-100 dark:border-red-900/30';
+    ?> text-sm font-semibold">
         <?php echo $mensaje; ?>
     </div>
     <?php endif; ?>
 
-    <!-- Almacén -->
-    <div class="mb-8 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-lg p-6 border border-teal-200 dark:border-teal-800 shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-300">
-        <div class="flex items-center justify-between mb-4">
+    <!-- Almacén Section -->
+    <div class="almacen-card mb-8">
+        <div class="flex items-center justify-between pb-4 mb-5 border-b border-gray-100 dark:border-gray-800">
             <div>
-                <h2 class="text-xl font-semibold text-teal-900 dark:text-teal-300 flex items-center gap-2">
-                    <i class="fas fa-warehouse text-teal-600 dark:text-teal-400"></i>ALMACÉN
-                </h2>
-                <p class="text-xs text-teal-700 dark:text-teal-400 mt-1">Stock de ropa blanca y elementos extras</p>
+                <h2 class="text-[16px] font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Stock de Almacén</h2>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Inventario de reserva de lencería blanca y artículos de uso</p>
             </div>
             <?php if (esAdmin()): ?>
-            <button onclick="abrirModalInventario('ALMACEN', 'almacen')" 
-                    class="px-4 py-2 bg-teal-600 hover:bg-teal-700 hover:scale-105 text-white rounded-lg transition-all duration-200 shadow-sm hover:shadow-md text-sm">
-                <i class="fas fa-edit mr-2"></i>Editar
+            <button onclick="abrirModalInventario('ALMACEN', 'almacen')" class="px-4 py-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 rounded-xl border border-gray-200 dark:border-gray-750 transition font-semibold text-xs shadow-sm">
+                Editar Almacén
             </button>
             <?php endif; ?>
         </div>
         
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
-            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-md hover:scale-105 transition-all duration-200">
-                <span class="text-gray-600 dark:text-gray-400">Manteles:</span>
-                <strong class="ml-2 text-teal-700 dark:text-teal-300"><?php echo $almacen['manteles']; ?></strong>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            <div class="stock-box">
+                <div class="stock-label">Manteles</div>
+                <div class="stock-num"><?php echo $almacen['manteles']; ?></div>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-md hover:scale-105 transition-all duration-200">
-                <span class="text-gray-600 dark:text-gray-400">Cubrecamas:</span>
-                <strong class="ml-2 text-teal-700 dark:text-teal-300"><?php echo $almacen['cubrecamas']; ?></strong>
+            <div class="stock-box">
+                <div class="stock-label">Cubrecamas</div>
+                <div class="stock-num"><?php echo $almacen['cubrecamas']; ?></div>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-md hover:scale-105 transition-all duration-200">
-                <span class="text-gray-600 dark:text-gray-400">Sábanas ½ plaza:</span>
-                <strong class="ml-2 text-teal-700 dark:text-teal-300"><?php echo $almacen['sabanas_media_plaza']; ?></strong>
+            <div class="stock-box">
+                <div class="stock-label">Sábanas ½ Pl.</div>
+                <div class="stock-num"><?php echo $almacen['sabanas_media_plaza']; ?></div>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-md hover:scale-105 transition-all duration-200">
-                <span class="text-gray-600 dark:text-gray-400">Sábanas 2 plazas:</span>
-                <strong class="ml-2 text-teal-700 dark:text-teal-300"><?php echo $almacen['sabanas_doble_plaza']; ?></strong>
+            <div class="stock-box">
+                <div class="stock-label">Sábanas 2 Pl.</div>
+                <div class="stock-num"><?php echo $almacen['sabanas_doble_plaza']; ?></div>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-md hover:scale-105 transition-all duration-200">
-                <span class="text-gray-600 dark:text-gray-400">Almohadas:</span>
-                <strong class="ml-2 text-teal-700 dark:text-teal-300"><?php echo $almacen['almohadas']; ?></strong>
+            <div class="stock-box">
+                <div class="stock-label">Almohadas</div>
+                <div class="stock-num"><?php echo $almacen['almohadas']; ?></div>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-md hover:scale-105 transition-all duration-200">
-                <span class="text-gray-600 dark:text-gray-400">Fundas:</span>
-                <strong class="ml-2 text-teal-700 dark:text-teal-300"><?php echo $almacen['fundas']; ?></strong>
+            <div class="stock-box">
+                <div class="stock-label">Fundas</div>
+                <div class="stock-num"><?php echo $almacen['fundas']; ?></div>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-md hover:scale-105 transition-all duration-200">
-                <span class="text-gray-600 dark:text-gray-400">Frazadas:</span>
-                <strong class="ml-2 text-teal-700 dark:text-teal-300"><?php echo $almacen['frazadas']; ?></strong>
+            <div class="stock-box">
+                <div class="stock-label">Frazadas</div>
+                <div class="stock-num"><?php echo $almacen['frazadas']; ?></div>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-md hover:scale-105 transition-all duration-200">
-                <span class="text-gray-600 dark:text-gray-400">Toallas:</span>
-                <strong class="ml-2 text-teal-700 dark:text-teal-300"><?php echo $almacen['toallas']; ?></strong>
+            <div class="stock-box">
+                <div class="stock-label">Toallas</div>
+                <div class="stock-num"><?php echo $almacen['toallas']; ?></div>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-md hover:scale-105 transition-all duration-200">
-                <span class="text-gray-600 dark:text-gray-400">Cortinas:</span>
-                <strong class="ml-2 text-teal-700 dark:text-teal-300"><?php echo $almacen['cortinas_almacen']; ?></strong>
+            <div class="stock-box">
+                <div class="stock-label">Cortinas</div>
+                <div class="stock-num"><?php echo $almacen['cortinas_almacen']; ?></div>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-3 rounded border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-md hover:scale-105 transition-all duration-200">
-                <span class="text-gray-600 dark:text-gray-400">Alfombras:</span>
-                <strong class="ml-2 text-teal-700 dark:text-teal-300"><?php echo $almacen['alfombras_almacen']; ?></strong>
+            <div class="stock-box">
+                <div class="stock-label">Alfombras</div>
+                <div class="stock-num"><?php echo $almacen['alfombras_almacen']; ?></div>
             </div>
         </div>
     </div>
 
-    <!-- Habitaciones -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        <?php foreach ($inventarios_habitaciones as $inv): ?>
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-indigo-200 dark:border-indigo-900 hover:border-indigo-400 dark:hover:border-indigo-600 shadow-sm hover:shadow-lg hover:scale-105 hover:-translate-y-1 transition-all duration-300">
-            <div class="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 p-4 rounded-t-lg border-b border-indigo-200 dark:border-indigo-800">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-indigo-900 dark:text-indigo-300">Hab. <?php echo $inv['habitacion_numero']; ?></h3>
-                    <button onclick="abrirModalInventario('<?php echo $inv['habitacion_numero']; ?>', 'habitacion')"
-                            class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-900 p-2 rounded transition-all duration-200 hover:scale-110">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="p-4 grid grid-cols-2 gap-2 text-sm">
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
-                    <span class="text-gray-600 dark:text-gray-400">Cortinas</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['cortinas']; ?></strong>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
-                    <span class="text-gray-600 dark:text-gray-400">Veladores</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['veladores']; ?></strong>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
-                    <span class="text-gray-600 dark:text-gray-400">Roperos</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['roperos']; ?></strong>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
-                    <span class="text-gray-600 dark:text-gray-400">Colgadores</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['colgadores']; ?></strong>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
-                    <span class="text-gray-600 dark:text-gray-400">Basureros</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['basureros']; ?></strong>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
-                    <span class="text-gray-600 dark:text-gray-400">Shampoo</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['shampoo']; ?></strong>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
-                    <span class="text-gray-600 dark:text-gray-400">Jabón líq.</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['jabon_liquido']; ?></strong>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
-                    <span class="text-gray-600 dark:text-gray-400">Sillas</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['sillas']; ?></strong>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
-                    <span class="text-gray-600 dark:text-gray-400">Sillones</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['sillones']; ?></strong>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
-                    <span class="text-gray-600 dark:text-gray-400">Alfombras</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['alfombras']; ?></strong>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
-                    <span class="text-gray-600 dark:text-gray-400">Camas</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['camas']; ?></strong>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
-                    <span class="text-gray-600 dark:text-gray-400">Televisión</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['television']; ?></strong>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1 col-span-2">
-                    <span class="text-gray-600 dark:text-gray-400">Lámparas</span>
-                    <strong class="text-gray-900 dark:text-white"><?php echo $inv['lamparas']; ?></strong>
-                </div>
-            </div>
-        </div>
-        <?php endforeach; ?>
-    </div>
-    
-    <!-- Panel de Edición Masiva -->
-    <div id="panel_edicion_masiva" class="hidden mt-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-cyan-300 dark:border-cyan-700 shadow-xl p-4">
-        <div class="flex items-center justify-between mb-4">
+    <!-- Panel de Edición Masiva (Screen only sheet) -->
+    <div id="panel_edicion_masiva" class="hidden apple-card mb-8">
+        <div class="flex items-center justify-between pb-4 mb-5 border-b border-gray-100 dark:border-gray-800">
             <div>
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <i class="fas fa-table text-cyan-600"></i>Edición Masiva de Habitaciones
-                </h2>
-                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Edita todas las habitaciones a la vez desde esta tabla</p>
+                <h2 class="text-[16px] font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Edición Masiva de Habitaciones</h2>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 font-medium">Actualiza de forma rápida múltiples cuartos a la vez</p>
             </div>
-            <button onclick="toggleEdicionMasiva()" 
-                    class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-all">
-                <i class="fas fa-times mr-2"></i>Cerrar
+            <button onclick="toggleEdicionMasiva()" class="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-750 text-gray-500 rounded-xl transition text-xs font-semibold">
+                Ocultar
             </button>
         </div>
         
-        <form method="POST" class="overflow-x-auto">
+        <form method="POST">
             <input type="hidden" name="guardar_masivo" value="1">
-            <table class="w-full text-xs border-collapse">
-                <thead class="bg-gradient-to-r from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 sticky top-0">
-                    <tr>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-left text-xs font-semibold text-gray-900 dark:text-white">Hab.</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-window-alt block mb-0.5"></i>Cortinas</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-lightbulb block mb-0.5"></i>Velador</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-door-open block mb-0.5"></i>Ropero</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-grip-lines-vertical block mb-0.5"></i>Colgador</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-trash block mb-0.5"></i>Basurero</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-pump-soap block mb-0.5"></i>Shampoo</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-hand-sparkles block mb-0.5"></i>Jabón</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-chair block mb-0.5"></i>Silla</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-couch block mb-0.5"></i>Sillón</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-rug block mb-0.5"></i>Alfombra</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-bed block mb-0.5"></i>Cama</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-tv block mb-0.5"></i>TV</th>
-                        <th class="border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-center text-[10px] font-semibold text-gray-900 dark:text-white"><i class="fas fa-lightbulb block mb-0.5"></i>Lámpara</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($inventarios_habitaciones as $inv): ?>
-                    <tr class="hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors">
-                        <td class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-xs font-semibold text-cyan-700 dark:text-cyan-300 bg-gray-50 dark:bg-gray-900">
-                            <?php echo $inv['habitacion_numero']; ?>
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][cortinas]" 
-                                   value="<?php echo $inv['cortinas']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][veladores]" 
-                                   value="<?php echo $inv['veladores']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][roperos]" 
-                                   value="<?php echo $inv['roperos']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][colgadores]" 
-                                   value="<?php echo $inv['colgadores']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][basureros]" 
-                                   value="<?php echo $inv['basureros']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][shampoo]" 
-                                   value="<?php echo $inv['shampoo']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][jabon_liquido]" 
-                                   value="<?php echo $inv['jabon_liquido']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][sillas]" 
-                                   value="<?php echo $inv['sillas']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][sillones]" 
-                                   value="<?php echo $inv['sillones']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][alfombras]" 
-                                   value="<?php echo $inv['alfombras']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][camas]" 
-                                   value="<?php echo $inv['camas']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][television]" 
-                                   value="<?php echo $inv['television']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                        <td class="border border-gray-300 dark:border-gray-600 px-1 py-1">
-                            <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][lamparas]" 
-                                   value="<?php echo $inv['lamparas']; ?>" min="0" 
-                                   class="w-12 px-1 py-0.5 text-xs text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-cyan-500">
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="spreadsheet-table">
+                    <thead>
+                        <tr>
+                            <th class="font-bold text-gray-800 dark:text-gray-300">Habit.</th>
+                            <th>Cortinas</th>
+                            <th>Veladores</th>
+                            <th>Roperos</th>
+                            <th>Colgadores</th>
+                            <th>Basureros</th>
+                            <th>Shampoo</th>
+                            <th>Jabón L.</th>
+                            <th>Sillas</th>
+                            <th>Sillones</th>
+                            <th>Alfombras</th>
+                            <th>Camas</th>
+                            <th>TV</th>
+                            <th>Lámparas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($inventarios_habitaciones as $inv): ?>
+                        <tr>
+                            <td class="font-bold text-gray-900 dark:text-white bg-gray-50/50 dark:bg-white/[0.02]">
+                                <?php echo $inv['habitacion_numero']; ?>
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][cortinas]" value="<?php echo $inv['cortinas']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][veladores]" value="<?php echo $inv['veladores']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][roperos]" value="<?php echo $inv['roperos']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][colgadores]" value="<?php echo $inv['colgadores']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][basureros]" value="<?php echo $inv['basureros']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][shampoo]" value="<?php echo $inv['shampoo']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][jabon_liquido]" value="<?php echo $inv['jabon_liquido']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][sillas]" value="<?php echo $inv['sillas']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][sillones]" value="<?php echo $inv['sillones']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][alfombras]" value="<?php echo $inv['alfombras']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][camas]" value="<?php echo $inv['camas']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][television]" value="<?php echo $inv['television']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                            <td>
+                                <input type="number" name="hab[<?php echo $inv['habitacion_numero']; ?>][lamparas]" value="<?php echo $inv['lamparas']; ?>" min="0" class="w-12 text-center text-xs py-0.5 border border-gray-250 dark:border-gray-650 rounded bg-transparent text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
             
-            <div class="mt-4 flex justify-end">
-                <button type="submit" 
-                        class="px-6 py-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 font-semibold">
-                    <i class="fas fa-save mr-2"></i>Guardar Todo
+            <div class="mt-5 flex justify-end">
+                <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm transition duration-200 shadow-sm">
+                    Guardar Cambios Masivos
                 </button>
             </div>
         </form>
     </div>
+
+    <!-- Rooms Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <?php foreach ($inventarios_habitaciones as $inv): ?>
+        <div class="apple-card flex flex-col justify-between hover:translate-y-[-2px] transition duration-200">
+            <div>
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-gray-100 dark:border-gray-800">
+                    <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Habitación <?php echo $inv['habitacion_numero']; ?></h3>
+                    <button onclick="abrirModalInventario('<?php echo $inv['habitacion_numero']; ?>', 'habitacion')" class="text-gray-400 hover:text-blue-600 p-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition duration-150">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs font-semibold">
+                    <div class="flex justify-between border-b border-gray-50 dark:border-gray-800 py-1">
+                        <span class="text-gray-400 dark:text-gray-500">Cortinas</span>
+                        <span class="text-gray-900 dark:text-white font-bold font-variant-numeric-tabular"><?php echo $inv['cortinas']; ?></span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-50 dark:border-gray-800 py-1">
+                        <span class="text-gray-400 dark:text-gray-500">Veladores</span>
+                        <span class="text-gray-900 dark:text-white font-bold font-variant-numeric-tabular"><?php echo $inv['veladores']; ?></span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-50 dark:border-gray-800 py-1">
+                        <span class="text-gray-400 dark:text-gray-500">Roperos</span>
+                        <span class="text-gray-900 dark:text-white font-bold font-variant-numeric-tabular"><?php echo $inv['roperos']; ?></span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-50 dark:border-gray-800 py-1">
+                        <span class="text-gray-400 dark:text-gray-500">Colgadores</span>
+                        <span class="text-gray-900 dark:text-white font-bold font-variant-numeric-tabular"><?php echo $inv['colgadores']; ?></span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-50 dark:border-gray-800 py-1">
+                        <span class="text-gray-400 dark:text-gray-500">Basureros</span>
+                        <span class="text-gray-900 dark:text-white font-bold font-variant-numeric-tabular"><?php echo $inv['basureros']; ?></span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-50 dark:border-gray-800 py-1">
+                        <span class="text-gray-400 dark:text-gray-500">Shampoo</span>
+                        <span class="text-gray-900 dark:text-white font-bold font-variant-numeric-tabular"><?php echo $inv['shampoo']; ?></span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-50 dark:border-gray-800 py-1">
+                        <span class="text-gray-400 dark:text-gray-500">Jabón L.</span>
+                        <span class="text-gray-900 dark:text-white font-bold font-variant-numeric-tabular"><?php echo $inv['jabon_liquido']; ?></span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-50 dark:border-gray-800 py-1">
+                        <span class="text-gray-400 dark:text-gray-500">Sillas</span>
+                        <span class="text-gray-900 dark:text-white font-bold font-variant-numeric-tabular"><?php echo $inv['sillas']; ?></span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-50 dark:border-gray-800 py-1">
+                        <span class="text-gray-400 dark:text-gray-500">Sillones</span>
+                        <span class="text-gray-900 dark:text-white font-bold font-variant-numeric-tabular"><?php echo $inv['sillones']; ?></span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-50 dark:border-gray-800 py-1">
+                        <span class="text-gray-400 dark:text-gray-500">Alfombras</span>
+                        <span class="text-gray-900 dark:text-white font-bold font-variant-numeric-tabular"><?php echo $inv['alfombras']; ?></span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-50 dark:border-gray-800 py-1">
+                        <span class="text-gray-400 dark:text-gray-500">Camas</span>
+                        <span class="text-gray-900 dark:text-white font-bold font-variant-numeric-tabular"><?php echo $inv['camas']; ?></span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-50 dark:border-gray-800 py-1">
+                        <span class="text-gray-400 dark:text-gray-500">Televisión</span>
+                        <span class="text-gray-900 dark:text-white font-bold font-variant-numeric-tabular"><?php echo $inv['television']; ?></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-3 border-t border-gray-50 dark:border-gray-800 flex justify-between items-center text-[10px] font-bold text-gray-400">
+                <span>Lámparas</span>
+                <span class="text-gray-800 dark:text-gray-300 text-xs font-variant-numeric-tabular"><?php echo $inv['lamparas']; ?></span>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
 </div>
 
 <!-- Modal para editar inventario -->
-<div id="modal_inventario" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border-2 border-indigo-200 dark:border-indigo-900">
-        <div class="sticky top-0 bg-gradient-to-br from-indigo-600 to-purple-600 dark:from-indigo-800 dark:to-purple-800 text-white p-6 rounded-t-lg z-10 shadow-lg">
-            <h2 class="text-2xl font-semibold" id="modal_titulo">Editar Inventario</h2>
-            <p class="text-indigo-100 dark:text-indigo-200 mt-1 text-sm" id="modal_subtitulo"></p>
+<div id="modal_inventario" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="modal-sheet w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-gray-50 dark:bg-gray-900 px-6 sm:px-8 py-5 border-b border-gray-100 dark:border-gray-800 rounded-t-3xl z-10">
+            <h2 class="text-xl font-extrabold text-gray-900 dark:text-white" id="modal_titulo">Editar Inventario</h2>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 font-semibold" id="modal_subtitulo"></p>
         </div>
         
-        <form method="POST" class="p-6">
+        <form method="POST" class="p-6 sm:p-8">
             <input type="hidden" name="guardar_inventario" value="1">
             <input type="hidden" name="habitacion_numero" id="input_habitacion_numero">
             <input type="hidden" name="tipo" id="input_tipo">
             
             <!-- Campos para habitación -->
-            <div id="campos_habitacion" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-window-alt mr-2"></i>Cortinas
-                    </label>
-                    <input type="number" name="cortinas" id="input_cortinas" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            <div id="campos_habitacion" class="grid grid-cols-2 md:grid-cols-3 gap-5 mb-6">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Cortinas</label>
+                    <input type="number" name="cortinas" id="input_cortinas" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-lightbulb mr-2"></i>Veladores
-                    </label>
-                    <input type="number" name="veladores" id="input_veladores" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Veladores</label>
+                    <input type="number" name="veladores" id="input_veladores" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-door-open mr-2"></i>Roperos
-                    </label>
-                    <input type="number" name="roperos" id="input_roperos" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Roperos</label>
+                    <input type="number" name="roperos" id="input_roperos" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-grip-lines-vertical mr-2"></i>Colgadores
-                    </label>
-                    <input type="number" name="colgadores" id="input_colgadores" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Colgadores</label>
+                    <input type="number" name="colgadores" id="input_colgadores" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-trash mr-2"></i>Basureros
-                    </label>
-                    <input type="number" name="basureros" id="input_basureros" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Basureros</label>
+                    <input type="number" name="basureros" id="input_basureros" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-pump-soap mr-2"></i>Shampoo
-                    </label>
-                    <input type="number" name="shampoo" id="input_shampoo" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Shampoo</label>
+                    <input type="number" name="shampoo" id="input_shampoo" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-hand-sparkles mr-2"></i>Jabón líquido
-                    </label>
-                    <input type="number" name="jabon_liquido" id="input_jabon_liquido" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Jabón líquido</label>
+                    <input type="number" name="jabon_liquido" id="input_jabon_liquido" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-chair mr-2"></i>Sillas
-                    </label>
-                    <input type="number" name="sillas" id="input_sillas" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Sillas</label>
+                    <input type="number" name="sillas" id="input_sillas" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-couch mr-2"></i>Sillones
-                    </label>
-                    <input type="number" name="sillones" id="input_sillones" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Sillones</label>
+                    <input type="number" name="sillones" id="input_sillones" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-rug mr-2"></i>Alfombras
-                    </label>
-                    <input type="number" name="alfombras" id="input_alfombras" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Alfombras</label>
+                    <input type="number" name="alfombras" id="input_alfombras" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-bed mr-2"></i>Camas
-                    </label>
-                    <input type="number" name="camas" id="input_camas" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Camas</label>
+                    <input type="number" name="camas" id="input_camas" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-tv mr-2"></i>Televisión
-                    </label>
-                    <input type="number" name="television" id="input_television" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Televisión</label>
+                    <input type="number" name="television" id="input_television" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-lightbulb mr-2"></i>Lámparas
-                    </label>
-                    <input type="number" name="lamparas" id="input_lamparas" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5 col-span-2 md:col-span-1">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Lámparas</label>
+                    <input type="number" name="lamparas" id="input_lamparas" min="0" class="apple-input font-bold">
                 </div>
             </div>
             
             <!-- Campos para almacén -->
-            <div id="campos_almacen" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-utensils mr-2"></i>Manteles
-                    </label>
-                    <input type="number" name="manteles" id="input_manteles" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            <div id="campos_almacen" class="hidden grid grid-cols-2 md:grid-cols-3 gap-5 mb-6">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Manteles</label>
+                    <input type="number" name="manteles" id="input_manteles" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-bed mr-2"></i>Cubrecamas
-                    </label>
-                    <input type="number" name="cubrecamas" id="input_cubrecamas" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Cubrecamas</label>
+                    <input type="number" name="cubrecamas" id="input_cubrecamas" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-bed mr-2"></i>Sábanas ½ plaza
-                    </label>
-                    <input type="number" name="sabanas_media_plaza" id="input_sabanas_media_plaza" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Sábanas ½ plaza</label>
+                    <input type="number" name="sabanas_media_plaza" id="input_sabanas_media_plaza" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-bed mr-2"></i>Sábanas 2 plazas
-                    </label>
-                    <input type="number" name="sabanas_doble_plaza" id="input_sabanas_doble_plaza" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Sábanas 2 plazas</label>
+                    <input type="number" name="sabanas_doble_plaza" id="input_sabanas_doble_plaza" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-pillow mr-2"></i>Almohadas
-                    </label>
-                    <input type="number" name="almohadas" id="input_almohadas" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Almohadas</label>
+                    <input type="number" name="almohadas" id="input_almohadas" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-bed mr-2"></i>Fundas
-                    </label>
-                    <input type="number" name="fundas" id="input_fundas" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Fundas</label>
+                    <input type="number" name="fundas" id="input_fundas" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-bed mr-2"></i>Frazadas
-                    </label>
-                    <input type="number" name="frazadas" id="input_frazadas" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Frazadas</label>
+                    <input type="number" name="frazadas" id="input_frazadas" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-shower mr-2"></i>Toallas
-                    </label>
-                    <input type="number" name="toallas" id="input_toallas" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Toallas</label>
+                    <input type="number" name="toallas" id="input_toallas" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-window-alt mr-2"></i>Cortinas
-                    </label>
-                    <input type="number" name="cortinas_almacen" id="input_cortinas_almacen" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Cortinas</label>
+                    <input type="number" name="cortinas_almacen" id="input_cortinas_almacen" min="0" class="apple-input font-bold">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-rug mr-2"></i>Alfombras
-                    </label>
-                    <input type="number" name="alfombras_almacen" id="input_alfombras_almacen" min="0" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Alfombras</label>
+                    <input type="number" name="alfombras_almacen" id="input_alfombras_almacen" min="0" class="apple-input font-bold">
                 </div>
             </div>
             
-            <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button type="button" onclick="cerrarModalInventario()" 
-                        class="px-6 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+            <div class="flex justify-end gap-3 pt-5 border-t border-gray-100 dark:border-gray-800">
+                <button type="button" onclick="cerrarModalInventario()" class="px-5 py-2.5 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 dark:bg-gray-850 dark:text-gray-300 dark:hover:bg-gray-800 rounded-xl transition-colors">
                     Cancelar
                 </button>
-                <button type="submit" 
-                        class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
-                    <i class="fas fa-save mr-2"></i>Guardar
+                <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-sm">
+                    Guardar Cambios
                 </button>
             </div>
         </form>
@@ -619,7 +731,7 @@ function abrirModalInventario(habitacion_numero, tipo) {
     
     if (tipo === 'almacen') {
         document.getElementById('modal_titulo').textContent = 'Almacén - Inventario';
-        document.getElementById('modal_subtitulo').textContent = 'Stock de ropa blanca y elementos extras';
+        document.getElementById('modal_subtitulo').textContent = 'Stock de lencería blanca y artículos de uso';
         document.getElementById('campos_habitacion').classList.add('hidden');
         document.getElementById('campos_almacen').classList.remove('hidden');
         
@@ -637,8 +749,8 @@ function abrirModalInventario(habitacion_numero, tipo) {
         document.getElementById('input_alfombras_almacen').value = <?php echo $almacen['alfombras_almacen']; ?>;
         <?php endif; ?>
     } else {
-        document.getElementById('modal_titulo').textContent = 'Habitación ' + habitacion_numero;
-        document.getElementById('modal_subtitulo').textContent = 'Control de elementos físicos';
+        document.getElementById('modal_titulo').textContent = 'Inventario: Habitación ' + habitacion_numero;
+        document.getElementById('modal_subtitulo').textContent = 'Control y auditoría de elementos físicos';
         document.getElementById('campos_habitacion').classList.remove('hidden');
         document.getElementById('campos_almacen').classList.add('hidden');
         
@@ -669,7 +781,7 @@ function cerrarModalInventario() {
     document.getElementById('modal_inventario').classList.add('hidden');
 }
 
-// Cerrar modal al hacer clic fuera
+// Cerrar modal al hacer clic en el backdrop
 document.getElementById('modal_inventario').addEventListener('click', function(e) {
     if (e.target === this) {
         cerrarModalInventario();
@@ -686,6 +798,12 @@ function toggleEdicionMasiva() {
         panel.classList.add('hidden');
     }
 }
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        cerrarModalInventario();
+    }
+});
 </script>
 
 <?php include __DIR__ . '/../../includes/footer.php'; ?>

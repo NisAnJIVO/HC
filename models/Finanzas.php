@@ -204,15 +204,28 @@ class Finanzas {
             
             // Gestionar tabla pagos_qr
             if ($metodo_anterior === 'qr' && $metodo_pago_nuevo !== 'qr') {
-                // Eliminar de pagos_qr si se cambió de QR a otro método
-                $sql = "DELETE FROM pagos_qr WHERE ocupacion_id = :ocupacion_id 
-                        AND monto = :monto AND fecha = :fecha";
-                $stmt = $this->conn->prepare($sql);
-                $stmt->execute([
+                // Buscar el ID ESPECÍFICO del registro en pagos_qr (LIMIT 1 para seguridad)
+                // Esto evita eliminar múltiples registros con el mismo monto y fecha
+                $sql_buscar = "SELECT id FROM pagos_qr 
+                               WHERE ocupacion_id = :ocupacion_id 
+                               AND monto = :monto 
+                               AND fecha = :fecha 
+                               ORDER BY id DESC 
+                               LIMIT 1";
+                $stmt_buscar = $this->conn->prepare($sql_buscar);
+                $stmt_buscar->execute([
                     ':ocupacion_id' => $ingreso['ocupacion_id'],
-                    ':monto' => $ingreso['monto'],
-                    ':fecha' => $ingreso['fecha']
+                    ':monto'        => $ingreso['monto'],
+                    ':fecha'        => $ingreso['fecha']
                 ]);
+                $pago_qr = $stmt_buscar->fetch();
+                
+                if ($pago_qr) {
+                    // Eliminar solo por ID — completamente seguro
+                    $sql = "DELETE FROM pagos_qr WHERE id = :id";
+                    $stmt = $this->conn->prepare($sql);
+                    $stmt->execute([':id' => $pago_qr['id']]);
+                }
             } elseif ($metodo_anterior !== 'qr' && $metodo_pago_nuevo === 'qr') {
                 // Agregar a pagos_qr si se cambió a QR desde otro método
                 $datos_qr = [

@@ -53,11 +53,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
         
         if ($huespedModel->actualizar($ocupacion['huesped_id'], $datos_huesped)) {
+            if (empty($_POST['prox_destino'])) {
+                throw new Exception('El Próximo Destino es obligatorio.');
+            }
+            if (empty($_POST['via_ingreso'])) {
+                throw new Exception('La Vía de Ingreso es obligatoria.');
+            }
+
             // Actualizar datos de la ocupación
             $datos_ocupacion = [
                 'nro_pieza' => clean_input($_POST['nro_pieza']),
-                'prox_destino' => !empty($_POST['prox_destino']) ? clean_input($_POST['prox_destino']) : null,
-                'via_ingreso' => !empty($_POST['via_ingreso']) ? clean_input($_POST['via_ingreso']) : null,
+                'prox_destino' => clean_input($_POST['prox_destino']),
+                'via_ingreso' => clean_input($_POST['via_ingreso']),
                 'nro_dias' => (int)$_POST['nro_dias']
             ];
             
@@ -326,11 +333,12 @@ include __DIR__ . '/../../includes/header.php';
                 </div>
                 
                 <div class="space-y-2">
-                    <label class="block text-sm font-bold text-gray-800 mb-2">Próximo Destino</label>
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Próximo Destino <span class="text-red-655 text-base">*</span></label>
                     <input 
                         type="text" 
                         name="prox_destino"
                         value="<?php echo htmlspecialchars($ocupacion['prox_destino'] ?? ''); ?>"
+                        required
                         class="w-full px-4 py-4 border-2 border-gray-400 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 transition-all duration-200 text-gray-900 font-medium placeholder-gray-400 hover:border-gray-500 shadow-sm"
                         placeholder="Ciudad o país de destino"
                     >
@@ -340,9 +348,10 @@ include __DIR__ . '/../../includes/header.php';
             <!-- Fila 2: Vía de Ingreso y Días -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                    <label class="block text-sm font-bold text-gray-800 mb-2">Vía de Ingreso</label>
+                    <label class="block text-sm font-bold text-gray-800 mb-2">Vía de Ingreso <span class="text-red-655 text-base">*</span></label>
                     <select 
                         name="via_ingreso"
+                        required
                         class="w-full px-4 py-4 border-2 border-gray-400 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 transition-all duration-200 text-gray-900 font-medium appearance-none bg-white hover:border-gray-500 shadow-sm"
                     >
                         <option value="">Seleccione</option>

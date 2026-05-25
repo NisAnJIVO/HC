@@ -255,60 +255,77 @@ if (empty($mantenimientos)) {
                     // Determinar el tipo de imagen
                     $imagen_procesada = $imagen_path;
                     
-                    // Si es PNG, convertir a JPG para evitar problemas con canal alpha
-                    if ($img_type === IMAGETYPE_PNG) {
-                        $source = imagecreatefrompng($imagen_path);
-                        $bg = imagecreatetruecolor($img_width, $img_height);
-                        $white = imagecolorallocate($bg, 255, 255, 255);
-                        imagefill($bg, 0, 0, $white);
-                        imagecopy($bg, $source, 0, 0, 0, 0, $img_width, $img_height);
-                        $imagen_procesada = __DIR__ . '/../../assets/img/Mantenimiento/temp_' . time() . '.jpg';
-                        imagejpeg($bg, $imagen_procesada, 90);
-                        imagedestroy($source);
-                        imagedestroy($bg);
+                    // Verificar si la extensión GD está disponible antes de procesar/convertir imágenes
+                    $gd_disponible = extension_loaded('gd') && function_exists('imagecreatetruecolor');
+                    
+                    if ($gd_disponible) {
+                        // Si es PNG, convertir a JPG para evitar problemas con canal alpha
+                        if ($img_type === IMAGETYPE_PNG && function_exists('imagecreatefrompng')) {
+                            $source = imagecreatefrompng($imagen_path);
+                            $bg = imagecreatetruecolor($img_width, $img_height);
+                            $white = imagecolorallocate($bg, 255, 255, 255);
+                            imagefill($bg, 0, 0, $white);
+                            imagecopy($bg, $source, 0, 0, 0, 0, $img_width, $img_height);
+                            $imagen_procesada = __DIR__ . '/../../assets/img/Mantenimiento/temp_' . time() . '.jpg';
+                            imagejpeg($bg, $imagen_procesada, 90);
+                            imagedestroy($source);
+                            imagedestroy($bg);
+                        }
+                        // Si es GIF, convertir a JPG
+                        else if ($img_type === IMAGETYPE_GIF && function_exists('imagecreatefromgif')) {
+                            $source = imagecreatefromgif($imagen_path);
+                            $bg = imagecreatetruecolor($img_width, $img_height);
+                            $white = imagecolorallocate($bg, 255, 255, 255);
+                            imagefill($bg, 0, 0, $white);
+                            imagecopy($bg, $source, 0, 0, 0, 0, $img_width, $img_height);
+                            $imagen_procesada = __DIR__ . '/../../assets/img/Mantenimiento/temp_' . time() . '.jpg';
+                            imagejpeg($bg, $imagen_procesada, 90);
+                            imagedestroy($source);
+                            imagedestroy($bg);
+                        }
+                        // Para WEBP
+                        else if ($img_type === IMAGETYPE_WEBP && function_exists('imagecreatefromwebp')) {
+                            $source = imagecreatefromwebp($imagen_path);
+                            $bg = imagecreatetruecolor($img_width, $img_height);
+                            $white = imagecolorallocate($bg, 255, 255, 255);
+                            imagefill($bg, 0, 0, $white);
+                            imagecopy($bg, $source, 0, 0, 0, 0, $img_width, $img_height);
+                            $imagen_procesada = __DIR__ . '/../../assets/img/Mantenimiento/temp_' . time() . '.jpg';
+                            imagejpeg($bg, $imagen_procesada, 90);
+                            imagedestroy($source);
+                            imagedestroy($bg);
+                        }
                     }
-                    // Si es GIF, convertir a JPG
-                    else if ($img_type === IMAGETYPE_GIF) {
-                        $source = imagecreatefromgif($imagen_path);
-                        $bg = imagecreatetruecolor($img_width, $img_height);
-                        $white = imagecolorallocate($bg, 255, 255, 255);
-                        imagefill($bg, 0, 0, $white);
-                        imagecopy($bg, $source, 0, 0, 0, 0, $img_width, $img_height);
-                        $imagen_procesada = __DIR__ . '/../../assets/img/Mantenimiento/temp_' . time() . '.jpg';
-                        imagejpeg($bg, $imagen_procesada, 90);
-                        imagedestroy($source);
-                        imagedestroy($bg);
+                    
+                    // Verificar si se puede renderizar de forma segura (JPEG nativo o conversión GD disponible)
+                    $puede_renderizar = ($img_type === IMAGETYPE_JPEG) || $gd_disponible;
+                    
+                    if ($puede_renderizar) {
+                        // Calcular tamaño de imagen para que quepa en columna derecha
+                        $max_width = $col_right_width;
+                        $max_height = 50; // Altura máxima
+                        
+                        $ratio = min($max_width / $img_width, $max_height / $img_height);
+                        $new_width = $img_width * $ratio;
+                        $new_height = $img_height * $ratio;
+                        
+                        // Posicionar imagen en columna derecha, centrada verticalmente con el contenido
+                        $y_image = $y_start_content + 2;
+                        
+                        // Agregar imagen con borde
+                        $pdf->SetLineStyle(array('width' => 0.3, 'color' => array(203, 213, 224)));
+                        $pdf->Image($imagen_procesada, $x_right, $y_image, $new_width, $new_height, '', '', '', false, 300, '', false, false, 1, false, false, false);
+                        
+                        // Calcular la posición Y final de la imagen
+                        $y_max_right = $y_image + $new_height + 2;
+                    } else {
+                        // Si es PNG/GIF/WEBP transparente y no hay extensión GD, mostramos un mensaje sutil en vez de romper el PDF
+                        $pdf->SetFont('helvetica', 'I', 8);
+                        $pdf->SetTextColor(120, 130, 140);
+                        $pdf->SetXY($x_right, $y_start_content + 5);
+                        $pdf->MultiCell($col_right_width, 4, '[Foto adjunta en sistema]', 0, 'C', 0, 1, '', '', true, 0, false, true, 0, 'T');
+                        $y_max_right = $pdf->GetY() + 2;
                     }
-                    // Para WEBP
-                    else if (function_exists('imagecreatefromwebp') && $img_type === IMAGETYPE_WEBP) {
-                        $source = imagecreatefromwebp($imagen_path);
-                        $bg = imagecreatetruecolor($img_width, $img_height);
-                        $white = imagecolorallocate($bg, 255, 255, 255);
-                        imagefill($bg, 0, 0, $white);
-                        imagecopy($bg, $source, 0, 0, 0, 0, $img_width, $img_height);
-                        $imagen_procesada = __DIR__ . '/../../assets/img/Mantenimiento/temp_' . time() . '.jpg';
-                        imagejpeg($bg, $imagen_procesada, 90);
-                        imagedestroy($source);
-                        imagedestroy($bg);
-                    }
-                    
-                    // Calcular tamaño de imagen para que quepa en columna derecha
-                    $max_width = $col_right_width;
-                    $max_height = 50; // Altura máxima reducida en 60% (antes era 120mm)
-                    
-                    $ratio = min($max_width / $img_width, $max_height / $img_height);
-                    $new_width = $img_width * $ratio;
-                    $new_height = $img_height * $ratio;
-                    
-                    // Posicionar imagen en columna derecha, centrada verticalmente con el contenido
-                    $y_image = $y_start_content + 2;
-                    
-                    // Agregar imagen con borde
-                    $pdf->SetLineStyle(array('width' => 0.3, 'color' => array(203, 213, 224)));
-                    $pdf->Image($imagen_procesada, $x_right, $y_image, $new_width, $new_height, '', '', '', false, 300, '', false, false, 1, false, false, false);
-                    
-                    // Calcular la posición Y final de la imagen
-                    $y_max_right = $y_image + $new_height + 2;
                     
                     // Eliminar archivo temporal si se creó
                     if ($imagen_procesada !== $imagen_path && file_exists($imagen_procesada)) {

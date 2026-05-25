@@ -46,7 +46,7 @@ if (empty($huespedes)) {
             INNER JOIN habitaciones hab ON ro.habitacion_id = hab.id
             WHERE ro.habitacion_id = :habitacion_id 
             AND ro.estado = 'finalizado'
-            AND ro.fecha_salida_real >= DATE_SUB(NOW(), INTERVAL 48 HOUR)
+            AND ro.fecha_salida_real >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
             ORDER BY ro.fecha_ingreso ASC";
     
     $stmt = $registroModel->conn->prepare($sql);

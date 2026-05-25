@@ -7,9 +7,11 @@ $page_title = 'Planilla de Huéspedes';
 $conn = getConnection();
 $PER_PAGE = 20;
 
-$filtrando = isset($_GET['filtrar']);
 $fecha_inicio = $_GET['fecha_inicio'] ?? null;
 $fecha_fin    = $_GET['fecha_fin']    ?? null;
+$buscar       = trim($_GET['buscar']  ?? '');
+
+$filtrando = isset($_GET['filtrar']) || $buscar !== '' || ($fecha_inicio && $fecha_fin);
 
 $camposSelect = "SELECT ro.id, ro.huesped_id, ro.habitacion_id, ro.nro_pieza, ro.prox_destino,
         ro.via_ingreso, ro.fecha_ingreso, ro.nro_dias, ro.fecha_salida_estimada, ro.fecha_salida_real,
@@ -19,43 +21,52 @@ $camposSelect = "SELECT ro.id, ro.huesped_id, ro.habitacion_id, ro.nro_pieza, ro
         FROM registro_ocupacion ro
         INNER JOIN huespedes h ON ro.huesped_id = h.id";
 
-if ($filtrando && $fecha_inicio && $fecha_fin) {
-    $where = " WHERE ro.fecha_ingreso BETWEEN :fi AND :ff";
+// Construir cláusulas WHERE dinámicas
+$whereClauses = [];
+$queryParams = [];
 
-    $stmtCount = $conn->prepare("SELECT COUNT(*) " . substr($camposSelect, strpos($camposSelect, 'FROM')) . $where);
-    $stmtCount->execute([':fi' => $fecha_inicio, ':ff' => $fecha_fin]);
-    $total = (int)$stmtCount->fetchColumn();
-} else {
-    $fecha_inicio = null;
-    $fecha_fin    = null;
-
-    $stmtCount = $conn->prepare("SELECT COUNT(*) FROM registro_ocupacion");
-    $stmtCount->execute();
-    $total = (int)$stmtCount->fetchColumn();
+if ($fecha_inicio && $fecha_fin) {
+    $whereClauses[] = "ro.fecha_ingreso BETWEEN :fi AND :ff";
+    $queryParams[':fi'] = $fecha_inicio;
+    $queryParams[':ff'] = $fecha_fin;
 }
 
-// Total de páginas se calcula ANTES de saber la página actual
-// para que el default sea siempre la última
+if ($buscar !== '') {
+    $whereClauses[] = "(h.nombres_apellidos LIKE :b1 OR h.ci_pasaporte LIKE :b2 OR ro.nro_pieza LIKE :b3)";
+    $queryParams[':b1'] = '%' . $buscar . '%';
+    $queryParams[':b2'] = '%' . $buscar . '%';
+    $queryParams[':b3'] = '%' . $buscar . '%';
+}
+
+$where = "";
+if (count($whereClauses) > 0) {
+    $where = " WHERE " . implode(" AND ", $whereClauses);
+}
+
+// 1. Obtener conteo total con los filtros aplicados
+$sqlCount = "SELECT COUNT(*) " . substr($camposSelect, strpos($camposSelect, 'FROM')) . $where;
+$stmtCount = $conn->prepare($sqlCount);
+foreach ($queryParams as $key => $val) {
+    $stmtCount->bindValue($key, $val);
+}
+$stmtCount->execute();
+$total = (int)$stmtCount->fetchColumn();
+
+// 2. Calcular paginación
 $totalPaginas = max(1, ceil($total / $PER_PAGE));
 $pagina = isset($_GET['pagina']) ? max(1, min((int)$_GET['pagina'], $totalPaginas)) : $totalPaginas;
 $offset = ($pagina - 1) * $PER_PAGE;
 
-if ($filtrando && $fecha_inicio && $fecha_fin) {
-    $where = " WHERE ro.fecha_ingreso BETWEEN :fi AND :ff";
-    $stmtData = $conn->prepare($camposSelect . $where . " ORDER BY ro.id ASC LIMIT :lim OFFSET :off");
-    $stmtData->bindValue(':fi',  $fecha_inicio);
-    $stmtData->bindValue(':ff',  $fecha_fin);
-    $stmtData->bindValue(':lim', $PER_PAGE, PDO::PARAM_INT);
-    $stmtData->bindValue(':off', $offset,   PDO::PARAM_INT);
-    $stmtData->execute();
-    $registros = $stmtData->fetchAll();
-} else {
-    $stmtData = $conn->prepare($camposSelect . " ORDER BY ro.id ASC LIMIT :lim OFFSET :off");
-    $stmtData->bindValue(':lim', $PER_PAGE, PDO::PARAM_INT);
-    $stmtData->bindValue(':off', $offset,   PDO::PARAM_INT);
-    $stmtData->execute();
-    $registros = $stmtData->fetchAll();
+// 3. Obtener los registros paginados y filtrados
+$sqlData = $camposSelect . $where . " ORDER BY ro.id ASC LIMIT :lim OFFSET :off";
+$stmtData = $conn->prepare($sqlData);
+foreach ($queryParams as $key => $val) {
+    $stmtData->bindValue($key, $val);
 }
+$stmtData->bindValue(':lim', $PER_PAGE, PDO::PARAM_INT);
+$stmtData->bindValue(':off', $offset,   PDO::PARAM_INT);
+$stmtData->execute();
+$registros = $stmtData->fetchAll();
 
 // Helper para construir URLs de paginación conservando los filtros activos
 function paginaUrl(int $p): string {
@@ -68,6 +79,153 @@ include __DIR__ . '/../../includes/header.php';
 ?>
 
 <style>
+    body { background: #f4f4f5; }
+    .dark body { background: #080808; }
+
+    /* Contenedor Apple Clean */
+    .apple-card-clean {
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 20px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+        padding: 24px;
+    }
+    .dark .apple-card-clean {
+        background: #121212;
+        border-color: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Inputs Apple Style */
+    .input-apple {
+        width: 100%;
+        background: #f5f5f7;
+        border: 1px solid rgba(0, 0, 0, 0.02);
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #1c1c1e;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        outline: none;
+    }
+    .input-apple-search {
+        padding-left: 38px;
+    }
+    .input-apple:focus {
+        background: #ffffff;
+        border-color: #007aff;
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+    }
+    .dark .input-apple {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: transparent;
+        color: #ffffff;
+    }
+    .dark .input-apple:focus {
+        background: #1c1c1e;
+        border-color: #0a84ff;
+        box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+    }
+
+    /* Apple Pill Buttons */
+    .btn-apple {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+        border: 1px solid transparent;
+    }
+    .btn-apple:active {
+        transform: scale(0.97);
+    }
+
+    .btn-apple-primary {
+        background: #1c1c1e;
+        color: #ffffff;
+    }
+    .btn-apple-primary:hover {
+        background: #2c2c2e;
+    }
+    .dark .btn-apple-primary {
+        background: #ffffff;
+        color: #1c1c1e;
+    }
+    .dark .btn-apple-primary:hover {
+        background: #f5f5f7;
+    }
+
+    .btn-apple-secondary {
+        background: rgba(0, 0, 0, 0.04);
+        color: #1c1c1e;
+        border-color: rgba(0, 0, 0, 0.02);
+    }
+    .btn-apple-secondary:hover {
+        background: rgba(0, 0, 0, 0.08);
+    }
+    .dark .btn-apple-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.02);
+    }
+    .dark .btn-apple-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-apple-green {
+        background: rgba(52, 199, 89, 0.1);
+        color: #24b23e;
+    }
+    .btn-apple-green:hover {
+        background: rgba(52, 199, 89, 0.16);
+    }
+    .dark .btn-apple-green {
+        background: rgba(48, 209, 88, 0.15);
+        color: #30d158;
+    }
+    .dark .btn-apple-green:hover {
+        background: rgba(48, 209, 88, 0.22);
+    }
+
+    /* Paginación */
+    .pagination-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 550;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.04);
+        color: #1c1c1e;
+        transition: background 0.15s, color 0.15s;
+    }
+    .pagination-btn:hover {
+        background: rgba(0, 0, 0, 0.08);
+    }
+    .pagination-btn.active {
+        background: #1c1c1e;
+        color: #ffffff;
+        font-weight: 600;
+    }
+    .dark .pagination-btn {
+        background: rgba(255, 255, 255, 0.05);
+        color: #ffffff;
+    }
+    .dark .pagination-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .dark .pagination-btn.active {
+        background: #ffffff;
+        color: #1c1c1e;
+    }
+
     /* Estilos para impresión */
     @media print {
         body * {
@@ -86,8 +244,6 @@ include __DIR__ . '/../../includes/header.php';
             display: none !important;
         }
         
-        /* Configuración de página para oficio (8.5" x 13") */
-        /* Eliminar encabezados y pies de página del navegador */
         @page {
             size: legal landscape;
             margin: 0.5cm;
@@ -95,7 +251,6 @@ include __DIR__ . '/../../includes/header.php';
             margin-bottom: 0.5cm;
         }
         
-        /* Ocultar encabezado y pie de página del navegador */
         html {
             margin: 0;
         }
@@ -145,11 +300,19 @@ include __DIR__ . '/../../includes/header.php';
         
         .dark .planilla-print td,
         .dark .planilla-print th {
-            border-color: #666 !important;
+            border-color: rgba(255,255,255,0.06) !important;
         }
         
         .print-table {
             font-size: 10px;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .dark .print-table {
+            border-color: rgba(255, 255, 255, 0.05);
         }
         
         @media (min-width: 640px) {
@@ -160,149 +323,153 @@ include __DIR__ . '/../../includes/header.php';
         
         .print-table th,
         .print-table td {
-            padding: 4px 6px;
-            border: 1px solid #ddd;
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            border-right: 1px solid rgba(0, 0, 0, 0.04);
             white-space: nowrap;
         }
-        
-        @media (min-width: 640px) {
-            .print-table th,
-            .print-table td {
-                padding: 6px 8px;
-            }
+        .dark .print-table th,
+        .dark .print-table td {
+            border-bottom-color: rgba(255, 255, 255, 0.04);
+            border-right-color: rgba(255, 255, 255, 0.04);
         }
         
         .print-table thead {
-            background-color: #2c3e50;
-            color: white;
+            background-color: #f5f5f7;
+            color: #1c1c1e;
+            font-weight: 600;
+        }
+        .dark .print-table thead {
+            background-color: #1c1c1e;
+            color: #f5f5f7;
         }
     }
 </style>
 
-<!-- Controles de filtro -->
-<div class="no-print mb-6 sm:mb-8">
-    <div class="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-        <div class="px-4 py-4 sm:px-6 sm:py-5 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div class="flex-1">
-                    <h1 class="text-xl sm:text-2xl font-bold text-noir dark:text-white">Planilla de Huéspedes</h1>
-                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Registro oficial de ocupaciones</p>
-                </div>
-                <div class="flex gap-2 sm:gap-3">
-                    <a href="<?php echo BASE_PATH; ?>/index.php" class="flex-1 sm:flex-initial px-3 py-2 sm:px-4 text-sm sm:text-base border border-gray-300 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-center">
-                        ← Volver
-                    </a>
-                    <button onclick="exportarCSV()" class="flex-1 sm:flex-initial px-3 py-2 sm:px-4 text-sm sm:text-base border border-green-600 text-green-700 dark:text-green-400 dark:border-green-700 font-medium rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-all flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        CSV
-                    </button>
-                    <button onclick="window.print()" class="flex-1 sm:flex-initial px-3 py-2 sm:px-6 text-sm sm:text-base bg-noir dark:bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-800 dark:hover:bg-gray-700 transition-all shadow-md sm:shadow-lg flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                        </svg>
-                        <span class="hidden sm:inline">Imprimir / PDF</span>
-                        <span class="sm:hidden">PDF</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="p-4 sm:p-6">
-            <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-                <!-- Resetear página al filtrar -->
-                <input type="hidden" name="pagina" value="1">
-                <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Fecha Inicio</label>
-                    <input type="date" name="fecha_inicio" 
-                           value="<?php echo htmlspecialchars($fecha_inicio ?? ''); ?>"
-                           class="w-full px-3 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-noir focus:border-transparent bg-white dark:bg-gray-800 text-noir dark:text-white">
-                </div>
-                <div>
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Fecha Fin</label>
-                    <input type="date" name="fecha_fin" 
-                           value="<?php echo htmlspecialchars($fecha_fin ?? ''); ?>"
-                           class="w-full px-3 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-noir focus:border-transparent bg-white dark:bg-gray-800 text-noir dark:text-white">
-                </div>
-                <div class="sm:flex sm:items-end gap-2">
-                    <button type="submit" name="filtrar" class="w-full px-4 py-2 sm:py-2.5 text-sm sm:text-base bg-noir dark:bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-700 transition-all">
-                        Filtrar
-                    </button>
-                    <?php if ($filtrando): ?>
-                    <a href="?" class="mt-2 sm:mt-0 block w-full text-center px-4 py-2 sm:py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
-                        Limpiar
-                    </a>
-                    <?php endif; ?>
-                </div>
-            </form>
-            <!-- Búsqueda instantánea -->
-            <div class="mt-3">
+<!-- Cabecera minimalista superior -->
+<div class="no-print flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+    <div>
+        <p class="text-[11px] tracking-widest uppercase text-gray-400 font-semibold mb-1">Reportes Oficiales</p>
+        <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">Planilla de Huéspedes</h1>
+    </div>
+    <div class="flex flex-wrap gap-2.5">
+        <a href="<?php echo BASE_PATH; ?>/index.php" class="btn-apple btn-apple-secondary">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Volver
+        </a>
+        <button onclick="window.print()" class="btn-apple btn-apple-primary shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            Imprimir / PDF
+        </button>
+    </div>
+</div>
+
+<!-- Controles de filtro en tarjeta Apple Clean -->
+<div class="no-print mb-8">
+    <div class="apple-card-clean">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+            <!-- Resetear página al filtrar -->
+            <input type="hidden" name="pagina" value="1">
+            
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Búsqueda rápida</label>
                 <div class="relative">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg>
-                    <input type="text" id="busqueda-planilla" placeholder="Buscar por nombre, CI o pieza..."
-                           class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-noir focus:border-transparent bg-white dark:bg-gray-800 text-noir dark:text-white"
-                           oninput="filtrarTabla(this.value)">
+                    <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+                    </svg>
+                    <input type="text" name="buscar" placeholder="Nombre, CI o pieza..."
+                           value="<?php echo htmlspecialchars($buscar); ?>"
+                           class="input-apple input-apple-search">
                 </div>
-                <p id="contador-busqueda" class="text-xs text-gray-400 mt-1 hidden"></p>
             </div>
-        </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Fecha Inicio</label>
+                <input type="date" name="fecha_inicio" 
+                       value="<?php echo htmlspecialchars($fecha_inicio ?? ''); ?>"
+                       class="input-apple">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Fecha Fin</label>
+                <input type="date" name="fecha_fin" 
+                       value="<?php echo htmlspecialchars($fecha_fin ?? ''); ?>"
+                       class="input-apple">
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" name="filtrar" class="flex-1 btn-apple btn-apple-primary">
+                    Filtrar
+                </button>
+                <?php if ($filtrando): ?>
+                <a href="?" class="btn-apple btn-apple-secondary text-center px-4">
+                    Limpiar
+                </a>
+                <?php endif; ?>
+            </div>
+        </form>
     </div>
 </div>
 
 <!-- Planilla para imprimir -->
-<div class="planilla-print">
+<div class="planilla-print bg-white dark:bg-zinc-900 md:rounded-2xl p-5 md:p-6 border border-gray-100 dark:border-zinc-800 shadow-sm md:shadow-md">
     <!-- Encabezado de la planilla -->
-    <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
-        <h2 style="margin: 5px 0; font-size: 20px; font-weight: bold;">HOTEL CECIL</h2>
-        <h4 style="margin: 5px 0; font-size: 14px;">PLANILLA DE REGISTRO DE HUÉSPEDES</h4>
+    <div class="mb-6 pb-4 border-b-2 border-gray-900 dark:border-white text-center">
+        <h2 class="text-2xl font-black tracking-tight text-gray-900 dark:text-white">HOTEL CECIL</h2>
+        <h4 class="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 mt-1 font-semibold">Planilla Oficial de Registro de Huéspedes</h4>
     </div>
     
     <!-- Tabla de registros -->
-    <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-        <table class="print-table" style="width: 100%; border-collapse: collapse; min-width: 1200px;">
+    <div class="w-full overflow-x-auto -webkit-overflow-scrolling: touch;">
+        <table class="print-table w-full text-left min-width: 1200px;">
             <thead>
                 <tr>
-                    <th style="text-align: center; font-weight: bold;">Nro</th>
-                    <th style="text-align: left; font-weight: bold;">Nombres y Apellidos</th>
-                    <th style="text-align: center; font-weight: bold;">G</th>
-                    <th style="text-align: center; font-weight: bold;">Edad</th>
-                    <th style="text-align: center; font-weight: bold;">E.C.</th>
-                    <th style="text-align: left; font-weight: bold;">Nacionalidad</th>
-                    <th style="text-align: left; font-weight: bold;">C.I./Pasaporte</th>
-                    <th style="text-align: left; font-weight: bold;">Profesión</th>
-                    <th style="text-align: left; font-weight: bold;">Objeto</th>
-                    <th style="text-align: center; font-weight: bold;">Pieza</th>
-                    <th style="text-align: left; font-weight: bold;">Procedencia</th>
-                    <th style="text-align: left; font-weight: bold;">Próx. Destino</th>
-                    <th style="text-align: center; font-weight: bold;">Vía</th>
-                    <th style="text-align: center; font-weight: bold;">F. Ingreso</th>
-                    <th style="text-align: center; font-weight: bold;">Días</th>
+                    <th class="text-center font-bold">Nro</th>
+                    <th class="font-bold">Nombres y Apellidos</th>
+                    <th class="text-center font-bold">G</th>
+                    <th class="text-center font-bold">Edad</th>
+                    <th class="text-center font-bold">E.C.</th>
+                    <th class="font-bold">Nacionalidad</th>
+                    <th class="font-bold">C.I./Pasaporte</th>
+                    <th class="font-bold">Profesión</th>
+                    <th class="font-bold">Objeto</th>
+                    <th class="text-center font-bold">Pieza</th>
+                    <th class="font-bold">Procedencia</th>
+                    <th class="font-bold">Próx. Destino</th>
+                    <th class="text-center font-bold">Vía</th>
+                    <th class="text-center font-bold">F. Ingreso</th>
+                    <th class="text-center font-bold">Días</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($registros)): ?>
                     <tr>
-                        <td colspan="15" style="text-align: center; padding: 20px; color: #666;">
-                            No hay registros para mostrar en el período seleccionado
+                        <td colspan="15" class="text-center py-10 text-gray-400 font-medium">
+                            No se encontraron registros de huéspedes con los filtros seleccionados.
                         </td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($registros as $idx => $reg): ?>
-                        <tr>
-                            <td style="text-align: center;"><?php echo $idx + 1; ?></td>
-                            <td style="text-align: left;"><?php echo htmlspecialchars($reg['nombres_apellidos']); ?></td>
-                            <td style="text-align: center;"><?php echo $reg['genero']; ?></td>
-                            <td style="text-align: center;"><?php echo $reg['edad']; ?></td>
-                            <td style="text-align: center;"><?php echo htmlspecialchars($reg['estado_civil'] ?? '-'); ?></td>
-                            <td style="text-align: left;"><?php echo htmlspecialchars($reg['nacionalidad']); ?></td>
-                            <td style="text-align: left;"><?php echo htmlspecialchars($reg['ci_pasaporte']); ?></td>
-                            <td style="text-align: left;"><?php echo htmlspecialchars($reg['profesion'] ?? '-'); ?></td>
-                            <td style="text-align: left;"><?php echo htmlspecialchars($reg['objeto'] ?? '-'); ?></td>
-                            <td style="text-align: center; font-weight: bold;"><?php echo $reg['nro_pieza']; ?></td>
-                            <td style="text-align: left;"><?php echo htmlspecialchars($reg['procedencia'] ?? '-'); ?></td>
-                            <td style="text-align: left;"><?php echo htmlspecialchars($reg['prox_destino'] ?? '-'); ?></td>
-                            <td style="text-align: center;"><?php echo $reg['via_ingreso'] ? strtoupper($reg['via_ingreso']) : '-'; ?></td>
-                            <td style="text-align: center;"><?php echo formatDate($reg['fecha_ingreso']); ?></td>
-                            <td style="text-align: center;"><?php echo $reg['nro_dias']; ?></td>
+                        <tr class="hover:bg-gray-50/50 dark:hover:bg-white/[0.01] transition-colors">
+                            <td class="text-center font-mono text-gray-400"><?php echo $offset + $idx + 1; ?></td>
+                            <td class="font-medium text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($reg['nombres_apellidos']); ?></td>
+                            <td class="text-center"><?php echo htmlspecialchars($reg['genero']); ?></td>
+                            <td class="text-center font-mono"><?php echo (int)$reg['edad']; ?></td>
+                            <td class="text-center"><?php echo htmlspecialchars($reg['estado_civil'] ?? '-'); ?></td>
+                            <td><?php echo htmlspecialchars($reg['nacionalidad']); ?></td>
+                            <td class="font-mono text-gray-600 dark:text-gray-300"><?php echo htmlspecialchars($reg['ci_pasaporte']); ?></td>
+                            <td><?php echo htmlspecialchars($reg['profesion'] ?? '-'); ?></td>
+                            <td><?php echo htmlspecialchars($reg['objeto'] ?? '-'); ?></td>
+                            <td class="text-center font-bold font-mono text-gray-800 dark:text-gray-100"><?php echo htmlspecialchars($reg['nro_pieza']); ?></td>
+                            <td><?php echo htmlspecialchars($reg['procedencia'] ?? '-'); ?></td>
+                            <td><?php echo htmlspecialchars($reg['prox_destino'] ?? '-'); ?></td>
+                            <td class="text-center font-bold text-[10px]"><?php echo $reg['via_ingreso'] ? strtoupper(htmlspecialchars($reg['via_ingreso'])) : '-'; ?></td>
+                            <td class="text-center font-mono text-xs"><?php echo formatDate($reg['fecha_ingreso']); ?></td>
+                            <td class="text-center font-mono font-bold"><?php echo (int)$reg['nro_dias']; ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -311,27 +478,27 @@ include __DIR__ . '/../../includes/header.php';
     </div>
     
     <!-- Footer con totales -->
-    <div style="margin-top: 20px; padding-top: 10px; border-top: 2px solid #000;">
-        <p style="margin: 5px 0; font-weight: bold;">Total de registros: <?php echo $total; ?></p>
-        <p style="margin: 5px 0; font-size: 10px; color: #666;">
-            Documento generado electrónicamente por el Sistema de Gestión Hotel Cecil
+    <div class="mt-6 pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Total de registros encontrados: <span class="font-mono text-lg font-bold ml-1"><?php echo $total; ?></span></p>
+        <p class="text-[10px] text-gray-400 tracking-wider uppercase font-semibold">
+            Sistema de Gestión Hotel Cecil
         </p>
     </div>
 </div>
 
-<!-- Controles de paginación (no se imprimen) -->
-<div class="no-print mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-600 dark:text-gray-400">
+<!-- Controles de paginación -->
+<div class="no-print mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400 font-semibold uppercase tracking-wider">
     <div>
-        Mostrando <strong><?php echo count($registros); ?></strong> de <strong><?php echo $total; ?></strong> registros
-        &nbsp;·&nbsp; Página <strong><?php echo $pagina; ?></strong> de <strong><?php echo $totalPaginas; ?></strong>
+        Mostrando <strong class="text-gray-700 dark:text-gray-200 font-mono"><?php echo count($registros); ?></strong> de <strong class="text-gray-700 dark:text-gray-200 font-mono"><?php echo $total; ?></strong> registros
+        &nbsp;·&nbsp; Página <strong class="text-gray-700 dark:text-gray-200 font-mono"><?php echo $pagina; ?></strong> de <strong class="text-gray-700 dark:text-gray-200 font-mono"><?php echo $totalPaginas; ?></strong>
     </div>
-    <div class="flex items-center gap-1">
+    <div class="flex items-center gap-1.5 normal-case tracking-normal">
         <?php if ($pagina > 1): ?>
-            <a href="<?php echo paginaUrl(1); ?>" class="px-3 py-1.5 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">«</a>
-            <a href="<?php echo paginaUrl($pagina - 1); ?>" class="px-3 py-1.5 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Anterior</a>
+            <a href="<?php echo paginaUrl(1); ?>" class="pagination-btn">«</a>
+            <a href="<?php echo paginaUrl($pagina - 1); ?>" class="pagination-btn">Anterior</a>
         <?php else: ?>
-            <span class="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 cursor-not-allowed">«</span>
-            <span class="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 cursor-not-allowed">Anterior</span>
+            <span class="pagination-btn opacity-40 cursor-not-allowed">«</span>
+            <span class="pagination-btn opacity-40 cursor-not-allowed">Anterior</span>
         <?php endif; ?>
 
         <?php
@@ -340,73 +507,21 @@ include __DIR__ . '/../../includes/header.php';
         for ($i = $inicio; $i <= $fin; $i++):
         ?>
             <?php if ($i === $pagina): ?>
-                <span class="px-3 py-1.5 bg-gray-800 dark:bg-gray-600 text-white rounded-lg font-semibold"><?php echo $i; ?></span>
+                <span class="pagination-btn active"><?php echo $i; ?></span>
             <?php else: ?>
-                <a href="<?php echo paginaUrl($i); ?>" class="px-3 py-1.5 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"><?php echo $i; ?></a>
+                <a href="<?php echo paginaUrl($i); ?>" class="pagination-btn"><?php echo $i; ?></a>
             <?php endif; ?>
         <?php endfor; ?>
 
         <?php if ($pagina < $totalPaginas): ?>
-            <a href="<?php echo paginaUrl($pagina + 1); ?>" class="px-3 py-1.5 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Siguiente</a>
-            <a href="<?php echo paginaUrl($totalPaginas); ?>" class="px-3 py-1.5 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">»</a>
+            <a href="<?php echo paginaUrl($pagina + 1); ?>" class="pagination-btn">Siguiente</a>
+            <a href="<?php echo paginaUrl($totalPaginas); ?>" class="pagination-btn">»</a>
         <?php else: ?>
-            <span class="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 cursor-not-allowed">Siguiente</span>
-            <span class="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 cursor-not-allowed">»</span>
+            <span class="pagination-btn opacity-40 cursor-not-allowed">Siguiente</span>
+            <span class="pagination-btn opacity-40 cursor-not-allowed">»</span>
         <?php endif; ?>
     </div>
 </div>
 
 <?php include __DIR__ . '/../../includes/footer.php'; ?>
-
-<script>
-// ── Búsqueda instantánea ────────────────────────────────────────────────────
-function filtrarTabla(query) {
-    const q = query.trim().toLowerCase();
-    const filas = document.querySelectorAll('table tbody tr');
-    let visibles = 0;
-
-    filas.forEach(fila => {
-        const texto = fila.textContent.toLowerCase();
-        const mostrar = !q || texto.includes(q);
-        fila.style.display = mostrar ? '' : 'none';
-        if (mostrar) visibles++;
-    });
-
-    const contador = document.getElementById('contador-busqueda');
-    if (q) {
-        contador.textContent = `${visibles} resultado${visibles !== 1 ? 's' : ''} encontrado${visibles !== 1 ? 's' : ''}`;
-        contador.classList.remove('hidden');
-    } else {
-        contador.classList.add('hidden');
-    }
-}
-
-// ── Exportar CSV ─────────────────────────────────────────────────────────────
-function exportarCSV() {
-    const tabla = document.querySelector('table');
-    if (!tabla) return;
-
-    const filas = tabla.querySelectorAll('tr');
-    const rows = [];
-
-    filas.forEach(fila => {
-        if (fila.style.display === 'none') return;
-        const celdas = fila.querySelectorAll('th, td');
-        const row = Array.from(celdas).map(c => {
-            // Escapar comillas y encerrar en comillas si contiene coma
-            let val = c.textContent.trim().replace(/"/g, '""');
-            return val.includes(',') || val.includes('\n') ? `"${val}"` : val;
-        });
-        rows.push(row.join(','));
-    });
-
-    const csv = '\uFEFF' + rows.join('\n'); // BOM para Excel con UTF-8
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `planilla_huespedes_<?php echo date('Y-m-d'); ?>.csv`;
-    link.click();
-    URL.revokeObjectURL(link.href);
-}
-</script>
 

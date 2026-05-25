@@ -11,14 +11,25 @@ require_once __DIR__ . '/../config/config.php';
 class TurnoRecepcionista {
     private $conn;
     
-    // Recepcionistas disponibles
-    const RECEPCIONISTAS = [
-        'Isaac Vargas',
-        'Gabriel Duran'
-    ];
-    
     public function __construct() {
         $this->conn = getConnection();
+    }
+    
+    /**
+     * Obtener la lista de recepcionistas activos desde la base de datos
+     * @return array Lista de nombres de recepcionistas activos
+     */
+    public function obtenerRecepcionistas() {
+        try {
+            $stmt = $this->conn->prepare(
+                "SELECT nombre_completo FROM usuarios WHERE activo = 1 ORDER BY nombre_completo ASC"
+            );
+            $stmt->execute();
+            return array_column($stmt->fetchAll(), 'nombre_completo');
+        } catch (PDOException $e) {
+            error_log("Error al obtener recepcionistas: " . $e->getMessage());
+            return [];
+        }
     }
     
     /**
@@ -38,11 +49,16 @@ class TurnoRecepcionista {
     
     /**
      * Obtener el nombre del recepcionista actualmente en turno
-     * @return string Nombre del recepcionista o 'Isaac Vargas' por defecto
+     * @return string Nombre del recepcionista o primer usuario activo por defecto
      */
     public function obtenerRecepcionistaActivo() {
         $turno = $this->obtenerTurnoActivo();
-        return $turno ? $turno['recepcionista_nombre'] : 'Isaac Vargas';
+        if ($turno) {
+            return $turno['recepcionista_nombre'];
+        }
+        // Fallback: primer usuario activo del sistema
+        $recepcionistas = $this->obtenerRecepcionistas();
+        return !empty($recepcionistas) ? $recepcionistas[0] : 'Sistema';
     }
     
     /**
@@ -55,15 +71,15 @@ class TurnoRecepcionista {
         try {
             $this->conn->beginTransaction();
             
-            // Validar que el recepcionista esté en la lista
-            if (!in_array($nuevo_recepcionista, self::RECEPCIONISTAS)) {
+            // Validar dinámicamente contra la base de datos
+            $recepcionistas = $this->obtenerRecepcionistas();
+            if (!in_array($nuevo_recepcionista, $recepcionistas)) {
                 throw new Exception("Recepcionista no válido: $nuevo_recepcionista");
             }
             
             // Verificar si el recepcionista ya está en turno
             $turno_actual = $this->obtenerTurnoActivo();
             if ($turno_actual && $turno_actual['recepcionista_nombre'] === $nuevo_recepcionista) {
-                // Ya está en turno, no hacer nada
                 $this->conn->rollBack();
                 return true;
             }
@@ -189,14 +205,7 @@ class TurnoRecepcionista {
         ];
     }
     
-    /**
-     * Obtener la lista de recepcionistas disponibles
-     * @return array Lista de nombres de recepcionistas
-     */
-    public static function obtenerRecepcionistas() {
-        return self::RECEPCIONISTAS;
-    }
-    
+
     /**
      * Verificar si un turno está activo hace más de 24 horas (alerta)
      * @return bool True si el turno lleva más de 24 horas
