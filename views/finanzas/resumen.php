@@ -141,41 +141,49 @@ body {
     color: #aeaeb2;
 }
 
-/* Premium Color Highlights for Metric Boxes */
+/* Premium Color Highlights for Metric Boxes (Stronger Colors) */
 .metric-efectivo {
-    background: rgba(52, 199, 89, 0.04);
-    border-color: rgba(52, 199, 89, 0.15);
+    background: rgba(52, 199, 89, 0.12);
+    border-color: rgba(52, 199, 89, 0.4);
+    color: #1e6b30;
 }
 .dark .metric-efectivo {
-    background: rgba(52, 199, 89, 0.06);
-    border-color: rgba(52, 199, 89, 0.2);
+    background: rgba(52, 199, 89, 0.2);
+    border-color: rgba(52, 199, 89, 0.6);
+    color: #34d158;
 }
 
 .metric-qr {
-    background: rgba(0, 113, 227, 0.04);
-    border-color: rgba(0, 113, 227, 0.15);
+    background: rgba(0, 113, 227, 0.12);
+    border-color: rgba(0, 113, 227, 0.4);
+    color: #0056b3;
 }
 .dark .metric-qr {
-    background: rgba(0, 113, 227, 0.06);
-    border-color: rgba(0, 113, 227, 0.2);
+    background: rgba(0, 113, 227, 0.2);
+    border-color: rgba(0, 113, 227, 0.6);
+    color: #4da3ff;
 }
 
 .metric-egresos {
-    background: rgba(255, 59, 48, 0.04);
-    border-color: rgba(255, 59, 48, 0.15);
+    background: rgba(255, 59, 48, 0.12);
+    border-color: rgba(255, 59, 48, 0.4);
+    color: #a71d2a;
 }
 .dark .metric-egresos {
-    background: rgba(255, 59, 48, 0.06);
-    border-color: rgba(255, 59, 48, 0.2);
+    background: rgba(255, 59, 48, 0.2);
+    border-color: rgba(255, 59, 48, 0.6);
+    color: #ff4554;
 }
 
 .metric-balance {
-    background: rgba(255, 149, 0, 0.04);
-    border-color: rgba(255, 149, 0, 0.15);
+    background: rgba(255, 149, 0, 0.12);
+    border-color: rgba(255, 149, 0, 0.4);
+    color: #a34e00;
 }
 .dark .metric-balance {
-    background: rgba(255, 149, 0, 0.06);
-    border-color: rgba(255, 149, 0, 0.2);
+    background: rgba(255, 149, 0, 0.2);
+    border-color: rgba(255, 149, 0, 0.6);
+    color: #ff9f43;
 }
 
 /* Premium Tables */
@@ -202,6 +210,41 @@ body {
     color: #aeaeb2;
     border-bottom-color: rgba(255, 255, 255, 0.06);
 }
+
+/* Colores distinguidos para las cabeceras de tabla (Temas Apple) */
+.table-efectivo-theme th {
+    background: rgba(52, 199, 89, 0.12) !important;
+    color: #1e6b30 !important;
+    border-bottom: 2px solid rgba(52, 199, 89, 0.3) !important;
+}
+.dark .table-efectivo-theme th {
+    background: rgba(52, 199, 89, 0.2) !important;
+    color: #34d158 !important;
+    border-bottom-color: rgba(52, 199, 89, 0.4) !important;
+}
+
+.table-qr-theme th {
+    background: rgba(0, 113, 227, 0.12) !important;
+    color: #0056b3 !important;
+    border-bottom: 2px solid rgba(0, 113, 227, 0.3) !important;
+}
+.dark .table-qr-theme th {
+    background: rgba(0, 113, 227, 0.2) !important;
+    color: #4da3ff !important;
+    border-bottom-color: rgba(0, 113, 227, 0.4) !important;
+}
+
+.table-egresos-theme th {
+    background: rgba(255, 59, 48, 0.12) !important;
+    color: #a71d2a !important;
+    border-bottom: 2px solid rgba(255, 59, 48, 0.3) !important;
+}
+.dark .table-egresos-theme th {
+    background: rgba(255, 59, 48, 0.2) !important;
+    color: #ff4554 !important;
+    border-bottom-color: rgba(255, 59, 48, 0.4) !important;
+}
+
 
 .premium-table td {
     padding: 12px 18px;
@@ -255,6 +298,123 @@ body {
     border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
+/* Mosaico de Liquidación Final */
+.liquidation-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+@media (min-width: 768px) {
+    .liquidation-grid {
+        grid-template-columns: repeat(5, 1fr);
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+}
+@media (max-width: 767px) {
+    .tile-balance {
+        grid-column: span 2;
+    }
+}
+
+.liq-tile {
+    border-radius: 16px;
+    padding: 12px 14px;
+    text-align: center;
+    border: 1.5px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.liq-tile-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+}
+
+.liq-tile-value {
+    font-size: 18px;
+    font-weight: 850;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+}
+
+.liq-tile-desc {
+    font-size: 9px;
+    font-weight: 500;
+    opacity: 0.8;
+    margin-top: 2px;
+}
+
+/* Colores más fuertes */
+.tile-efectivo {
+    background: rgba(52, 199, 89, 0.12);
+    border-color: rgba(52, 199, 89, 0.4);
+    color: #1e6b30;
+}
+.dark .tile-efectivo {
+    background: rgba(52, 199, 89, 0.2);
+    border-color: rgba(52, 199, 89, 0.6);
+    color: #34d158;
+}
+
+.tile-egresos {
+    background: rgba(255, 59, 48, 0.12);
+    border-color: rgba(255, 59, 48, 0.4);
+    color: #a71d2a;
+}
+.dark .tile-egresos {
+    background: rgba(255, 59, 48, 0.2);
+    border-color: rgba(255, 59, 48, 0.6);
+    color: #ff4554;
+}
+
+.tile-balance {
+    background: rgba(255, 149, 0, 0.12);
+    border-color: rgba(255, 149, 0, 0.4);
+    color: #a34e00;
+}
+.dark .tile-balance {
+    background: rgba(255, 149, 0, 0.2);
+    border-color: rgba(255, 149, 0, 0.6);
+    color: #ff9f43;
+}
+
+.tile-qr {
+    background: rgba(0, 113, 227, 0.12);
+    border-color: rgba(0, 113, 227, 0.4);
+    color: #0056b3;
+}
+.dark .tile-qr {
+    background: rgba(0, 113, 227, 0.2);
+    border-color: rgba(0, 113, 227, 0.6);
+    color: #4da3ff;
+}
+
+.tile-bruto {
+    background: rgba(108, 117, 125, 0.12);
+    border-color: rgba(108, 117, 125, 0.4);
+    color: #495057;
+}
+.dark .tile-bruto {
+    background: rgba(173, 181, 189, 0.2);
+    border-color: rgba(173, 181, 189, 0.6);
+    color: #f8f9fa;
+}
+
+.tile-utilidad {
+    background: rgba(23, 162, 184, 0.12);
+    border-color: rgba(23, 162, 184, 0.4);
+    color: #117a8b;
+}
+.dark .tile-utilidad {
+    background: rgba(23, 162, 184, 0.2);
+    border-color: rgba(23, 162, 184, 0.6);
+    color: #20c997;
+}
+
+
 /* ═══════════════════════════════════════════════
    LUXURIOUS COLORFUL PRINT / PDF STYLES
    ═══════════════════════════════════════════════ */
@@ -275,20 +435,29 @@ body {
     body {
         background-color: #f5f5f7 !important;
         color: #1d1d1f !important;
-        font-size: 9.5pt !important;
+        font-size: 9pt !important;
         padding-top: 0 !important;
         margin: 0 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
     
+    /* Eliminar el padding superior de la estructura general en impresión */
+    .hc-content {
+        padding-top: 0 !important;
+    }
+    .hc-content > div {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    
     .print-container {
         display: block !important;
         background-color: #ffffff !important;
         border: 1px solid rgba(0, 0, 0, 0.08) !important;
-        border-radius: 24px !important;
+        border-radius: 20px !important;
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.015) !important;
-        padding: 0.8cm !important;
+        padding: 0.5cm !important;
         max-width: 100% !important;
         width: 100% !important;
         margin: 0 !important;
@@ -299,15 +468,15 @@ body {
     .summary-cards {
         display: grid !important;
         grid-template-columns: repeat(4, 1fr) !important;
-        gap: 12px !important;
-        margin-bottom: 0.6cm !important;
+        gap: 10px !important;
+        margin-bottom: 0.4cm !important;
     }
     
     .mini-metric {
         background-color: #ffffff !important;
         border: 1px solid rgba(0, 0, 0, 0.06) !important;
-        border-radius: 16px !important;
-        padding: 14px !important;
+        border-radius: 12px !important;
+        padding: 10px !important;
         display: block !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
@@ -331,7 +500,7 @@ body {
     }
 
     .table-responsive {
-        border-radius: 16px !important;
+        border-radius: 12px !important;
         border: 1px solid rgba(0, 0, 0, 0.06) !important;
         overflow: hidden !important;
         background-color: #ffffff !important;
@@ -341,8 +510,8 @@ body {
     
     table { 
         page-break-inside: auto; 
-        font-size: 8.5pt !important;
-        margin-bottom: 0.5cm !important;
+        font-size: 7.5pt !important;
+        margin-bottom: 0.3cm !important;
         border-collapse: collapse !important;
         width: 100% !important;
     }
@@ -361,40 +530,123 @@ body {
         color: #86868b !important;
         font-weight: 700 !important;
         border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-        padding: 10px 14px !important;
+        padding: 5px 8px !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
     
+    /* Temas para cabeceras de tabla en impresión */
+    .table-efectivo-theme th {
+        background-color: rgba(52, 199, 89, 0.15) !important;
+        color: #1b5e20 !important;
+        border-bottom: 1.5px solid rgba(52, 199, 89, 0.4) !important;
+    }
+    .table-qr-theme th {
+        background-color: rgba(0, 113, 227, 0.15) !important;
+        color: #0056b3 !important;
+        border-bottom: 1.5px solid rgba(0, 113, 227, 0.4) !important;
+    }
+    .table-egresos-theme th {
+        background-color: rgba(255, 59, 48, 0.15) !important;
+        color: #a71d2a !important;
+        border-bottom: 1.5px solid rgba(255, 59, 48, 0.4) !important;
+    }
+    
     .premium-table td {
         border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
-        padding: 10px 14px !important;
+        padding: 4px 8px !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
     
     .section-divider {
-        font-size: 10pt !important;
+        font-size: 8.5pt !important;
         font-weight: 800 !important;
         border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-        padding-bottom: 5px !important;
-        margin-top: 0.6cm !important;
-        margin-bottom: 0.3cm !important;
+        padding-bottom: 3px !important;
+        margin-top: 0.4cm !important;
+        margin-bottom: 0.2cm !important;
         color: #86868b !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
     
+    /* Mosaico en Impresión */
+    .liquidation-grid {
+        display: grid !important;
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 6px !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+    }
+    
+    .liq-tile {
+        padding: 6px 8px !important;
+        border-radius: 8px !important;
+        border-width: 1px !important;
+        text-align: center !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .liq-tile-title {
+        font-size: 7pt !important;
+        font-weight: 800 !important;
+    }
+    
+    .liq-tile-value {
+        font-size: 9.5pt !important;
+        font-weight: 900 !important;
+    }
+    
+    .liq-tile-desc {
+        font-size: 6pt !important;
+        opacity: 0.95 !important;
+    }
+    
+    /* Colores fuertemente contrastados en impresión */
+    .tile-efectivo {
+        background-color: rgba(52, 199, 89, 0.15) !important;
+        border-color: rgba(52, 199, 89, 0.6) !important;
+        color: #1e6b30 !important;
+    }
+    .tile-egresos {
+        background-color: rgba(255, 59, 48, 0.15) !important;
+        border-color: rgba(255, 59, 48, 0.6) !important;
+        color: #a71d2a !important;
+    }
+    .tile-balance {
+        background-color: rgba(255, 149, 0, 0.18) !important;
+        border-color: rgba(255, 149, 0, 0.6) !important;
+        color: #b45309 !important;
+    }
+    .tile-qr {
+        background-color: rgba(0, 113, 227, 0.15) !important;
+        border-color: rgba(0, 113, 227, 0.6) !important;
+        color: #0056b3 !important;
+    }
+    .tile-bruto {
+        background-color: rgba(108, 117, 125, 0.15) !important;
+        border-color: rgba(108, 117, 125, 0.6) !important;
+        color: #212529 !important;
+    }
+    .tile-utilidad {
+        background-color: rgba(23, 162, 184, 0.15) !important;
+        border-color: rgba(23, 162, 184, 0.6) !important;
+        color: #006064 !important;
+    }
+
+    
     .signature-section { 
-        margin-top: 1.2cm !important; 
+        margin-top: 0.8cm !important; 
         page-break-inside: avoid;
         border-top: 1px solid rgba(0,0,0,0.1) !important;
-        padding-top: 0.4cm !important;
+        padding-top: 0.3cm !important;
     }
     
     @page {
         size: letter portrait;
-        margin: 1.2cm 1cm 1cm 1cm;
+        margin: 1cm 1cm 1cm 1cm;
     }
 }
 </style>
@@ -490,36 +742,12 @@ body {
         </div>
     </div>
 
-    <!-- Executive Metrics Grid (Kept beautifully in screen AND print PDF) -->
-    <div class="summary-cards grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="mini-metric metric-efectivo">
-            <div class="mini-label">Ingresos Efectivo</div>
-            <div class="mini-num text-emerald-600 dark:text-emerald-450">Bs. <?php echo formatMoney($total_efectivo); ?></div>
-            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-semibold"><?php echo count($ingresos_efectivo); ?> transacciones</p>
-        </div>
-        <div class="mini-metric metric-qr">
-            <div class="mini-label">Ingresos QR</div>
-            <div class="mini-num text-blue-600 dark:text-blue-450">Bs. <?php echo formatMoney($total_qr); ?></div>
-            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-semibold"><?php echo count($ingresos_qr); ?> transacciones</p>
-        </div>
-        <div class="mini-metric metric-egresos">
-            <div class="mini-label">Egresos (Gastos)</div>
-            <div class="mini-num text-red-650 dark:text-red-400">Bs. <?php echo formatMoney($total_egresos); ?></div>
-            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-semibold"><?php echo count($egresos); ?> transacciones</p>
-        </div>
-        <div class="mini-metric metric-balance">
-            <div class="mini-label">Balance Neto Caja</div>
-            <div class="mini-num text-amber-600 dark:text-amber-500">Bs. <?php echo formatMoney($balance_recepcionista); ?></div>
-            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-semibold">Efectivo a liquidar</p>
-        </div>
-    </div>
-
     <!-- 1. INGRESOS EN EFECTIVO -->
     <div class="mb-8">
         <div class="section-divider">1. Ingresos en Efectivo</div>
         
         <div class="table-responsive">
-            <table class="premium-table">
+            <table class="premium-table table-efectivo-theme">
                 <thead>
                     <tr>
                         <th style="width: 15%">Fecha</th>
@@ -559,7 +787,7 @@ body {
         <div class="section-divider">2. Ingresos por Código QR</div>
         
         <div class="table-responsive">
-            <table class="premium-table">
+            <table class="premium-table table-qr-theme">
                 <thead>
                     <tr>
                         <th style="width: 15%">Fecha</th>
@@ -599,7 +827,7 @@ body {
         <div class="section-divider">3. Egresos (Gastos Operativos de Turno)</div>
         
         <div class="table-responsive">
-            <table class="premium-table">
+            <table class="premium-table table-egresos-theme">
                 <thead>
                     <tr>
                         <th style="width: 15%">Fecha</th>
@@ -652,35 +880,41 @@ body {
     <div class="mb-6">
         <div class="section-divider">4. Resumen y Liquidación Final</div>
         
-        <div class="border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
-            <table class="w-full text-xs sm:text-sm">
-                <tbody>
-                    <tr class="border-b border-gray-100 dark:border-gray-800">
-                        <td class="px-5 py-3.5 text-gray-600 dark:text-gray-400">Ingresos Efectivo (Caja física)</td>
-                        <td class="px-5 py-3.5 text-right font-bold text-emerald-600 dark:text-emerald-450 font-variant-numeric-tabular">+ Bs. <?php echo formatMoney($total_efectivo); ?></td>
-                    </tr>
-                    <tr class="border-b border-gray-100 dark:border-gray-800">
-                        <td class="px-5 py-3.5 text-gray-600 dark:text-gray-400">Egresos de Caja (Gastos autorizados)</td>
-                        <td class="px-5 py-3.5 text-right font-bold text-red-650 dark:text-red-450 font-variant-numeric-tabular">- Bs. <?php echo formatMoney($total_egresos); ?></td>
-                    </tr>
-                    <tr class="bg-amber-500/[0.04] dark:bg-amber-500/[0.1] border-y border-amber-200 dark:border-amber-900/40">
-                        <td class="px-5 py-4 font-extrabold text-amber-800 dark:text-amber-300 uppercase tracking-wider text-[11px]">Efectivo Neto a Entregar:</td>
-                        <td class="px-5 py-4 text-right font-extrabold text-lg text-amber-800 dark:text-amber-300 font-variant-numeric-tabular">Bs. <?php echo formatMoney($balance_recepcionista); ?></td>
-                    </tr>
-                    <tr class="border-b border-gray-100 dark:border-gray-800">
-                        <td class="px-5 py-3.5 text-gray-500">Ingresos por Código QR (Acreditado en Banco)</td>
-                        <td class="px-5 py-3.5 text-right font-semibold text-blue-600 dark:text-blue-400 font-variant-numeric-tabular">Bs. <?php echo formatMoney($total_qr); ?></td>
-                    </tr>
-                    <tr class="bg-gray-50 dark:bg-white/[0.02] border-t border-gray-200 dark:border-gray-800 font-bold">
-                        <td class="px-5 py-3.5 text-gray-900 dark:text-white uppercase tracking-wider text-[10px]">Ingreso Bruto Total:</td>
-                        <td class="px-5 py-3.5 text-right font-extrabold text-base text-gray-900 dark:text-white font-variant-numeric-tabular">Bs. <?php echo formatMoney($total_efectivo + $total_qr); ?></td>
-                    </tr>
-                    <tr class="bg-emerald-500/[0.04] dark:bg-emerald-500/[0.1] font-bold text-emerald-800 dark:text-emerald-450">
-                        <td class="px-5 py-3.5 uppercase tracking-wider text-[10px]">Utilidad de Operación Neta:</td>
-                        <td class="px-5 py-3.5 text-right font-extrabold text-base font-variant-numeric-tabular">Bs. <?php echo formatMoney($total_efectivo + $total_qr - $total_egresos); ?></td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="liquidation-grid">
+            <!-- 1. Dinero en Efectivo -->
+            <div class="liq-tile tile-efectivo">
+                <div class="liq-tile-title">Dinero en Efectivo</div>
+                <div class="liq-tile-value">Bs. <?php echo formatMoney($total_efectivo); ?></div>
+                <div class="liq-tile-desc">Ingresos físicos en caja</div>
+            </div>
+            
+            <!-- 2. Dinero de QR -->
+            <div class="liq-tile tile-qr">
+                <div class="liq-tile-title">Dinero de QR</div>
+                <div class="liq-tile-value">Bs. <?php echo formatMoney($total_qr); ?></div>
+                <div class="liq-tile-desc">Transferencias al banco</div>
+            </div>
+            
+            <!-- 3. Egresos -->
+            <div class="liq-tile tile-egresos">
+                <div class="liq-tile-title">Egresos</div>
+                <div class="liq-tile-value">- Bs. <?php echo formatMoney($total_egresos); ?></div>
+                <div class="liq-tile-desc">Salidas y gastos autorizados</div>
+            </div>
+            
+            <!-- 4. Ingresos -->
+            <div class="liq-tile tile-bruto">
+                <div class="liq-tile-title">Ingresos</div>
+                <div class="liq-tile-value">Bs. <?php echo formatMoney($total_efectivo + $total_qr); ?></div>
+                <div class="liq-tile-desc">Total recaudado bruto</div>
+            </div>
+            
+            <!-- 5. Monto a Entregar -->
+            <div class="liq-tile tile-balance">
+                <div class="liq-tile-title">Monto a Entregar</div>
+                <div class="liq-tile-value">Bs. <?php echo formatMoney($balance_recepcionista); ?></div>
+                <div class="liq-tile-desc">Efectivo neto en caja</div>
+            </div>
         </div>
     </div>
 
