@@ -112,14 +112,32 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
             font-weight: 400;
         }
         
-        /* Floating label states */
+        /* Floating label states - Including browser autofill states to prevent clashing */
         .flat-input:focus ~ .flat-label,
-        .flat-input:not(:placeholder-shown) ~ .flat-label {
+        .flat-input:not(:placeholder-shown) ~ .flat-label,
+        .flat-input:-webkit-autofill ~ .flat-label,
+        .flat-input:autofill ~ .flat-label {
             top: 6px;
             font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+        }
+
+        /* Prevent autofill yellow backgrounds and enforce proper text color */
+        .flat-input:-webkit-autofill,
+        .flat-input:-webkit-autofill:hover, 
+        .flat-input:-webkit-autofill:focus, 
+        .flat-input:-webkit-autofill:active {
+            -webkit-text-fill-color: #1d1d1f !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+        
+        .dark .flat-input:-webkit-autofill,
+        .dark .flat-input:-webkit-autofill:hover, 
+        .dark .flat-input:-webkit-autofill:focus, 
+        .dark .flat-input:-webkit-autofill:active {
+            -webkit-text-fill-color: #f5f5f7 !important;
         }
         
         /* Elegant Arrow Submit Button */
